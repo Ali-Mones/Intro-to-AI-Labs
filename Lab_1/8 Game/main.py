@@ -7,59 +7,73 @@ pygame.display.set_caption('8 Puzzle')
 clock = pygame.time.Clock()
 game_active = True
 
-start_point = (240, 80)
+START_POINT = (240, 80)
 
-tile_width = 134
+TILE_WIDTH = 134
 def rects_init():
     sty=0
-    sty=start_point[1]
+    sty=START_POINT[1]
     for i in [1,4,7]:
-        stx=start_point[0]
+        stx=START_POINT[0]
         for j in range(i, i+3):
             if j==9:
                 break
             tiles_rects[j]=tiles[j].get_rect(topleft=(stx,sty))
-            stx+=tile_width
-        sty+=tile_width
+            stx+=TILE_WIDTH
+        sty+=TILE_WIDTH
 
-def check_select(mouse_pos):
-    global selected
+def check_select(mouse_pos, ignore_tile=-1):
     for i in range(1,9):
-        if tiles_rects[i].collidepoint(mouse_pos):
+        if i!=ignore_tile and tiles_rects[i].collidepoint(mouse_pos):
             return i
     return -1    
 
-def move_tile(tile):
+def check_move(tile):
     global to_tile
     tile_rect = tiles_rects[tile]
-    pos = (tile_rect.x-start_point[0])//tile_width+(tile_rect.y-start_point[1])//tile_width*3
+    pos = (tile_rect.x-START_POINT[0])//TILE_WIDTH+(tile_rect.y-START_POINT[1])//TILE_WIDTH*3
     print("pos:",pos)
     if pos%3==0 or pos%3==1:
         if(state[pos+1]=='_'):
-            to_tile = (tile_rect.x+tile_width, tile_rect.y)
+            to_tile = (tile_rect.x+TILE_WIDTH, tile_rect.y)
             state[pos+1]=state[pos]
             state[pos]='_'
             return True
     if pos%3==1 or pos%3==2:
         if(state[pos-1]=='_'):
-            to_tile = (tile_rect.x-tile_width, tile_rect.y)
+            to_tile = (tile_rect.x-TILE_WIDTH, tile_rect.y)
             state[pos-1]=state[pos]
             state[pos]='_'
             return True
     if pos//3==0 or pos//3==1:
         if(state[pos+3]=='_'):
-            to_tile = (tile_rect.x, tile_rect.y+tile_width)
+            to_tile = (tile_rect.x, tile_rect.y+TILE_WIDTH)
             state[pos+3]=state[pos]
             state[pos]='_'
             return True
     if pos//3==1 or pos//3==2:
         if(state[pos-3]=='_'):
-            to_tile = (tile_rect.x, tile_rect.y-tile_width)
+            to_tile = (tile_rect.x, tile_rect.y-TILE_WIDTH)
             state[pos-3]=state[pos]
             state[pos]='_'
             return True
     return False
-    
+
+def move_tile():
+    global moving
+    tile_rect=tiles_rects[selected]
+    if to_tile[0] < tile_rect.x:
+        tile_rect.x = max(tile_rect.x-TILE_SPEED,to_tile[0])
+    elif to_tile[0] > tile_rect.x:
+        tile_rect.x = min(tile_rect.x+TILE_SPEED,to_tile[0])
+    elif to_tile[1] < tile_rect.y:
+        tile_rect.y = max(tile_rect.y-TILE_SPEED,to_tile[1])
+    elif to_tile[1] > tile_rect.y:
+        tile_rect.y = min(tile_rect.y+TILE_SPEED,to_tile[1])
+    if tile_rect.x==to_tile[0] and tile_rect.y==to_tile[1]:
+        moving = False
+        print("done")
+
 tiles = {
     1: pygame.image.load('Tiles/tile1_number_134_pixels/tile1_01_134.png').convert_alpha(),
     2: pygame.image.load('Tiles/tile1_number_134_pixels/tile1_02_134.png').convert_alpha(),
@@ -73,7 +87,7 @@ tiles = {
 tiles_rects:dict[int, pygame.Rect] = {}
 rects_init()
 
-play_mode = 1
+play_mode = 2
 
 background = pygame.image.load('Tiles/background2.jpg').convert_alpha()
 background = pygame.transform.rotozoom(background, 0, 2)
@@ -84,11 +98,17 @@ selected = 0
 
 state = "12345678_"
 state=list(state)
-to_tile = 0
+to_tile = (0,0)
 from_tile = 0
-tile_speed=7
-point_cursor = 11
-normal_cursor = 0
+TILE_SPEED=7
+POINT_CURSOR = 11
+NORMAL_CURSOR = 0
+mouse_hold = False
+mouse_hold_x=0
+mouse_hold_y=0
+mouse_hold_original_pos = (0,0)
+held_tile=0
+held_tile_rect=None
 while game_active:
     mouse = pygame.mouse
     for event in pygame.event.get():
@@ -96,33 +116,62 @@ while game_active:
             pygame.quit()
             exit()
         if check_select(mouse.get_pos())!=-1:
-            mouse.set_cursor(point_cursor)
+            mouse.set_cursor(POINT_CURSOR)
         else:
-            mouse.set_cursor(normal_cursor)
+            mouse.set_cursor(NORMAL_CURSOR)
     screen.blit(background, background_rect)
+
+    # playing
     if play_mode==1:
         if not moving:
             if mouse.get_pressed()[0]:
                 selected=check_select(mouse.get_pos())
 
-                if selected!=-1 and move_tile(selected):
+                if selected!=-1 and check_move(selected):
                     moving=True
                     print("moving")
         else:
-            tile_rect=tiles_rects[selected]
-            if to_tile[0] < tile_rect.x:
-                tile_rect.x = max(tile_rect.x-tile_speed,to_tile[0])
-            elif to_tile[0] > tile_rect.x:
-                tile_rect.x = min(tile_rect.x+tile_speed,to_tile[0])
-            elif to_tile[1] < tile_rect.y:
-                tile_rect.y = max(tile_rect.y-tile_speed,to_tile[1])
-            elif to_tile[1] > tile_rect.y:
-                tile_rect.y = min(tile_rect.y+tile_speed,to_tile[1])
-            if tile_rect.x==to_tile[0] and tile_rect.y==to_tile[1]:
-                moving = False
-                print("done")
+            move_tile()
+    # start screen 
     elif play_mode==2:
-        2
+        if moving:
+            move_tile()
+        elif not mouse_hold:
+            if mouse.get_pressed()[0]:
+                mouse_pos=mouse.get_pos()
+                held_tile = check_select(mouse_pos)
+                if held_tile != -1:
+                    mouse_hold=True
+                    held_tile_rect=tiles_rects[held_tile]
+                    mouse_hold_original_pos=held_tile_rect.topleft
+                    mouse_hold_x=mouse_pos[0]-(held_tile_rect.x)
+                    mouse_hold_y=mouse_pos[1]-(held_tile_rect.y)
+        else:
+            mouse_pos=mouse.get_pos()
+            if mouse.get_pressed()[0]:
+                held_tile_rect.x=mouse_pos[0]-mouse_hold_x
+                held_tile_rect.y=mouse_pos[1]-mouse_hold_y
+            else:
+                mouse_hold=False
+                selected=check_select(mouse_pos,held_tile)
+                print("sel:",selected)
+                if selected!=-1:
+                    held_tile_rect.x=(mouse_pos[0]-START_POINT[0])//TILE_WIDTH*TILE_WIDTH+START_POINT[0]
+                    held_tile_rect.y=(mouse_pos[1]-START_POINT[1])//TILE_WIDTH*TILE_WIDTH+START_POINT[1]
+                    to_tile=mouse_hold_original_pos
+                    moving=True
+                else:
+                    # check for empty space
+                    if mouse_pos[0]>=START_POINT[0] and mouse_pos[0]<=START_POINT[0]+3*TILE_WIDTH\
+                    and mouse_pos[1]>=START_POINT[1] and mouse_pos[1]<=START_POINT[1]+3*TILE_WIDTH\
+                    :
+                        moving=True
+                        selected=held_tile
+                        to_tile=((mouse_pos[0]-START_POINT[0])//TILE_WIDTH*TILE_WIDTH+START_POINT[0],
+                                 (mouse_pos[1]-START_POINT[1])//TILE_WIDTH*TILE_WIDTH+START_POINT[1])
+                    else:
+                        held_tile_rect.topleft=mouse_hold_original_pos
+
     for i in range(1,9):
         screen.blit(tiles[i],tiles_rects[i])
 
