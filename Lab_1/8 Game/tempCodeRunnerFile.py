@@ -1,1 +1,2 @@
-moving
+
+moving = False

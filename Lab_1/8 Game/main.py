@@ -74,6 +74,14 @@ def move_tile():
         moving = False
         print("done")
 
+def set_state():
+    for i in range(1,9):
+        tile_rect_pos = (tiles_rects[i].x-START_POINT[0])//TILE_WIDTH+(tiles_rects[i].y-START_POINT[1])//TILE_WIDTH*3 
+        print(i,tile_rect_pos)
+        state[tile_rect_pos]=f"{i}"
+    
+        
+
 tiles = {
     1: pygame.image.load('Tiles/tile1_number_134_pixels/tile1_01_134.png').convert_alpha(),
     2: pygame.image.load('Tiles/tile1_number_134_pixels/tile1_02_134.png').convert_alpha(),
@@ -88,8 +96,8 @@ tiles_rects:dict[int, pygame.Rect] = {}
 rects_init()
 
 text_font=pygame.font.Font('Font/Pixeltype.ttf',40)
-
-play_mode = 1
+# 1: play game, 2: setup board
+play_mode = 2
 
 background = pygame.image.load('Tiles/background2.jpg').convert_alpha()
 background = pygame.transform.rotozoom(background, 0, 2)
@@ -98,8 +106,10 @@ background_rect = background.get_rect(topleft = (0, 0))
 moving = False
 selected = 0
 
-state = "12345678_"
+state = "_________"
 state=list(state)
+
+
 to_tile = (0,0)
 from_tile = 0
 TILE_SPEED=7
@@ -114,7 +124,9 @@ mouse_hold_original_pos = (0,0)
 held_tile=0
 held_tile_rect=None
 # start button
-start_button = pygame.Rect(30,30,150,50)
+start_button = pygame.image.load('Tiles/play.png').convert_alpha()
+start_button = pygame.transform.rotozoom(start_button,0,0.4)
+start_button_rect = start_button.get_rect(topleft=(30,50))
 
 while game_active:
     mouse = pygame.mouse
@@ -141,28 +153,31 @@ while game_active:
             move_tile()
     # start screen 
     elif play_mode==2:
-        pygame.draw.rect(screen,"Green",start_button)
+        mouse_pos=mouse.get_pos()
+        screen.blit(start_button,start_button_rect)
         if moving:
             move_tile()
         elif not mouse_hold:
             if mouse.get_pressed()[0]:
-                mouse_pos=mouse.get_pos()
-                held_tile = check_select(mouse_pos)
-                if held_tile != -1:
-                    mouse_hold=True
-                    held_tile_rect=tiles_rects[held_tile]
-                    mouse_hold_original_pos=held_tile_rect.topleft
-                    mouse_hold_x=mouse_pos[0]-(held_tile_rect.x)
-                    mouse_hold_y=mouse_pos[1]-(held_tile_rect.y)
+                if start_button_rect.collidepoint(mouse_pos):
+                    set_state()
+                    print(state)
+                    play_mode=1
+                else:
+                    held_tile = check_select(mouse_pos)
+                    if held_tile != -1:
+                        mouse_hold=True
+                        held_tile_rect=tiles_rects[held_tile]
+                        mouse_hold_original_pos=held_tile_rect.topleft
+                        mouse_hold_x=mouse_pos[0]-(held_tile_rect.x)
+                        mouse_hold_y=mouse_pos[1]-(held_tile_rect.y)
         else:
-            mouse_pos=mouse.get_pos()
             if mouse.get_pressed()[0]:
                 held_tile_rect.x=mouse_pos[0]-mouse_hold_x
                 held_tile_rect.y=mouse_pos[1]-mouse_hold_y
             else:
                 mouse_hold=False
                 selected=check_select(mouse_pos,held_tile)
-                print("sel:",selected)
                 if selected!=-1:
                     held_tile_rect.x=(mouse_pos[0]-START_POINT[0])//TILE_WIDTH*TILE_WIDTH+START_POINT[0]
                     held_tile_rect.y=(mouse_pos[1]-START_POINT[1])//TILE_WIDTH*TILE_WIDTH+START_POINT[1]
