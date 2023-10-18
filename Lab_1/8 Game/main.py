@@ -1,5 +1,5 @@
 import pygame
-from sys import exc_info
+from sys import exit
 
 pygame.init()
 screen = pygame.display.set_mode((1000, 600))
@@ -87,7 +87,9 @@ tiles = {
 tiles_rects:dict[int, pygame.Rect] = {}
 rects_init()
 
-play_mode = 2
+text_font=pygame.font.Font('Font/Pixeltype.ttf',40)
+
+play_mode = 1
 
 background = pygame.image.load('Tiles/background2.jpg').convert_alpha()
 background = pygame.transform.rotozoom(background, 0, 2)
@@ -103,12 +105,17 @@ from_tile = 0
 TILE_SPEED=7
 POINT_CURSOR = 11
 NORMAL_CURSOR = 0
+
+# attributes for start of game
 mouse_hold = False
 mouse_hold_x=0
 mouse_hold_y=0
 mouse_hold_original_pos = (0,0)
 held_tile=0
 held_tile_rect=None
+# start button
+start_button = pygame.Rect(30,30,150,50)
+
 while game_active:
     mouse = pygame.mouse
     for event in pygame.event.get():
@@ -134,6 +141,7 @@ while game_active:
             move_tile()
     # start screen 
     elif play_mode==2:
+        pygame.draw.rect(screen,"Green",start_button)
         if moving:
             move_tile()
         elif not mouse_hold:
