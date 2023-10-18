@@ -1,6 +1,16 @@
 import pygame
 from sys import exit
 
+import ai_algorithms
+
+# state = "12345678_"
+# parents = ai_algorithms.BFS(state)
+# sol = "_12345678"
+# print(sol)
+# while parents[sol] != sol:
+#     sol = parents[sol]
+#     print(sol)
+
 
 
 
@@ -11,7 +21,8 @@ clock = pygame.time.Clock()
 game_active = True
 
 START_POINT = (240, 80)
-
+PLAY_GAME = 2
+SET_UP_BOARD = 1
 TILE_WIDTH = 134
 def rects_init():
     sty=0
@@ -83,6 +94,24 @@ def set_state():
         print(i,tile_rect_pos)
         state[tile_rect_pos]=f"{i}"
     
+def move_tile_animation():
+    # get child
+    global solved_moves_cnt, to_tile, state
+    cur_state = solved_moves_list[solved_moves_cnt]
+    print(cur_state)
+    if solved_moves_cnt >= len(solved_moves_list)-1:
+        return -1
+    solved_moves_cnt+=1
+    for i in range(9):
+        if cur_state[i]=='_':
+            state = list(solved_moves_list[solved_moves_cnt])
+            tile_to_move = int(state[i])
+            to_tile=(START_POINT[0]+TILE_WIDTH*(i%3),START_POINT[1]+TILE_WIDTH*(i//3))
+            
+            return tile_to_move
+
+
+
         
 
 tiles = {
@@ -100,7 +129,7 @@ rects_init()
 
 text_font=pygame.font.Font('Font/Pixeltype.ttf',40)
 # 1: play game, 2: setup board
-play_mode = 2
+play_mode = SET_UP_BOARD
 
 background = pygame.image.load('Tiles/background2.jpg').convert_alpha()
 background = pygame.transform.rotozoom(background, 0, 2)
@@ -131,21 +160,74 @@ start_button = pygame.image.load('Tiles/play.png').convert_alpha()
 start_button = pygame.transform.rotozoom(start_button,0,0.4)
 start_button_rect = start_button.get_rect(topleft=(30,50))
 
+solve_button_rect = pygame.Rect(30,50,200,50)
+show_moves_rect = pygame.Rect(30,150,200,50)
+show_solved_moves_animation = False
+solved_moves_list:list[str] = []
+solved_moves_cnt:int=0
+mouse_down = False
+
+
+
 while game_active:
     mouse = pygame.mouse
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        if check_select(mouse.get_pos())!=-1:
-            mouse.set_cursor(POINT_CURSOR)
-        else:
-            mouse.set_cursor(NORMAL_CURSOR)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            print("Donw")
+            mouse_down=True
+        elif event.type==pygame.MOUSEBUTTONUP:
+            print("Up")
+            mouse_down=False
+        
+        
+    if check_select(mouse.get_pos())!=-1:
+        mouse.set_cursor(POINT_CURSOR)
+    else:
+        mouse.set_cursor(NORMAL_CURSOR)
     screen.blit(background, background_rect)
 
     # playing
-    if play_mode==1:
-        if not moving:
+    if play_mode==PLAY_GAME:
+        pygame.draw.rect(screen, "Green", solve_button_rect)
+        pygame.draw.rect(screen, "Red", show_moves_rect)
+        if show_solved_moves_animation:
+            if moving:
+                move_tile()
+            else:
+                selected = move_tile_animation()
+                moving = True
+                print("moving ", to_tile)
+                print("moving tile ", selected)
+                if selected == -1:
+                    solved_moves_cnt=0
+                    solved_moves_list.clear()
+                    show_solved_moves_animation = False
+                    moving = False
+        elif mouse_down:
+            mouse_down=False
+            mouse_pos = mouse.get_pos()
+            if solve_button_rect.collidepoint(mouse_pos):
+                parents = ai_algorithms.BFS("".join(state))
+                if parents == None:
+                    print("Not solvable")
+                    solved_moves_list = None
+                else:
+                    sol = "_12345678"
+                    solved_moves_list.append(sol)
+                    while parents[sol] != sol:
+                        sol = parents[sol]
+                        solved_moves_list.append(sol)
+                    solved_moves_list.reverse()
+            elif show_moves_rect.collidepoint(mouse_pos):
+                if solved_moves_list!=None:
+                    print("start animation")
+                    print(solved_moves_list)
+                    show_solved_moves_animation=True
+
+        elif not moving:
             if mouse.get_pressed()[0]:
                 selected=check_select(mouse.get_pos())
 
@@ -155,17 +237,18 @@ while game_active:
         else:
             move_tile()
     # start screen 
-    elif play_mode==2:
+    elif play_mode==SET_UP_BOARD:
         mouse_pos=mouse.get_pos()
         screen.blit(start_button,start_button_rect)
         if moving:
             move_tile()
         elif not mouse_hold:
-            if mouse.get_pressed()[0]:
+            if mouse_down:
+                mouse_down=False
                 if start_button_rect.collidepoint(mouse_pos):
                     set_state()
                     print(state)
-                    play_mode=1
+                    play_mode=PLAY_GAME
                 else:
                     held_tile = check_select(mouse_pos)
                     if held_tile != -1:
