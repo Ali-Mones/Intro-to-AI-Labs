@@ -1,6 +1,9 @@
 import pygame
 from sys import exit
 
+
+
+
 pygame.init()
 screen = pygame.display.set_mode((1000, 600))
 pygame.display.set_caption('8 Puzzle')
