@@ -86,7 +86,7 @@ def BFS(init_state) -> dict[str,str]:
     # ask question 
     frontier_set : set[str] = set()
     frontier_set.add(init_state)
-    parent_map[init_state] = init_state
+    parent_map[init_state] = init_state  
     while  frontier :
         cur, level = frontier.popleft()
         depth = max(depth, level)
@@ -127,7 +127,7 @@ def M_Heuristic(state:str):
 
 
 def AStarManhattan(init_state:str) -> dict[str,str]:
-    global parent_map , explored , search_depth
+    global parent_map , explored , search_depth, depth, nodes_expanded
     parent_map.clear()
     explored.clear()
     search_depth = 0
@@ -150,6 +150,8 @@ def AStarManhattan(init_state:str) -> dict[str,str]:
         
         explored.add(state[0])
         if state[0] == "_12345678" :
+            nodes_expanded = len(explored)
+            print("path Cost : ",Pmap[state[0]][1])
             return parent_map
         
         neighbours = get_neighbours(state[0])
@@ -164,8 +166,9 @@ def AStarManhattan(init_state:str) -> dict[str,str]:
             elif neighbour in frontier_set:
                 if(G + 1 < Pmap[neighbour][1]):
                     Pmap[neighbour] = (state[0],G+1)   
-                    parent_map[neighbour] = state[0]      
-    
+                    parent_map[neighbour] = state[0] 
+                         
+    nodes_expanded = len(explored)
     return None 
 
     
@@ -187,11 +190,11 @@ def E_Heuristic(state:str):
             
             
 def AStarEuclidean(init_state:str) -> dict[str,str]:
-    global parent_map , explored , search_depth
+    global parent_map , explored , search_depth, depth, nodes_expanded
     parent_map.clear()
     explored.clear()
     search_depth = 0
-    Pmap:dict[str,tuple(str,float)] = {}
+    Pmap:dict[str,tuple(str,int)] = {}
     frontier : PriorityQueue[tuple(str,float)] = PriorityQueue()
     init_heur = E_Heuristic(init_state)
     frontier.put((init_state,init_heur))
@@ -210,6 +213,7 @@ def AStarEuclidean(init_state:str) -> dict[str,str]:
         
         explored.add(state[0])
         if state[0] == "_12345678" :
+            nodes_expanded = len(explored)
             return parent_map
         
         neighbours = get_neighbours(state[0])
@@ -226,4 +230,5 @@ def AStarEuclidean(init_state:str) -> dict[str,str]:
                     Pmap[neighbour] = (state[0],G+1)  
                     parent_map[neighbour] = state[0]      
     
+    nodes_expanded = len(explored)
     return None 
