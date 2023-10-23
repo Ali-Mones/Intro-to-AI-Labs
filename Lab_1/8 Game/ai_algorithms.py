@@ -4,7 +4,9 @@ from math import sqrt
 
 parent_map : dict[str,str] = {}
 explored : set[str] = set()
-search_depth = 0
+depth: int = 0
+nodes_expanded = 0
+
 
 def get_neighbours (state ) ->list[str] :
     pos = 0
@@ -42,18 +44,21 @@ def get_neighbours (state ) ->list[str] :
 
 # ----------------DFS----------------------
 def DFS(init_state) -> dict[str,str]:
-    global parent_map , explored , search_depth
+    global parent_map , explored , search_depth, depth, nodes_expanded
+    depth = 0
+    nodes_expanded=0
     parent_map.clear()
     explored.clear()
-    search_depth = 0
-    frontier : list[str] = [init_state]
+    frontier : list[(str, int)] = [(init_state, 0)]
     # ask question 
     frontier_set : set[str] = set()
     frontier_set.add(init_state)
     parent_map[init_state] = init_state
     
     while  frontier :
-        cur = frontier.pop()
+        cur, level = frontier.pop()
+        nodes_expanded+=1
+        depth=max(depth, level)
         explored.add(cur)
         # print(cur)
         if cur == "_12345678" :
@@ -62,7 +67,7 @@ def DFS(init_state) -> dict[str,str]:
         neighbours.reverse()
         for neighbour in neighbours :
             if not (neighbour in frontier_set or neighbour in explored) :
-                frontier.append(neighbour)
+                frontier.append((neighbour, level+1))
                 frontier_set.add(neighbour)
                 parent_map [neighbour] = cur
                 
@@ -71,27 +76,29 @@ def DFS(init_state) -> dict[str,str]:
         
 # ----------------BFS---------------------- 
 def BFS(init_state) -> dict[str,str]:
-    global parent_map , explored , search_depth
+    global parent_map , explored , search_depth, depth, nodes_expanded
+    depth = 0
+    nodes_expanded=0
     parent_map.clear()
     explored.clear()
-    search_depth = 0
-    frontier : deque[str] = deque()
-    frontier.append(init_state)
+    frontier : deque[(str, int)] = deque()
+    frontier.append((init_state, 0))
     # ask question 
     frontier_set : set[str] = set()
     frontier_set.add(init_state)
     parent_map[init_state] = init_state
-    
-    while frontier :
-        cur = frontier.popleft()
+    while  frontier :
+        cur, level = frontier.popleft()
+        depth = max(depth, level)
         explored.add(cur)
+        nodes_expanded+=1
         # print(cur)
         if cur == "_12345678" :
             return parent_map
         neighbours = get_neighbours(cur)
         for neighbour in neighbours :
             if not (neighbour in frontier_set or neighbour in explored) :
-                frontier.append(neighbour)
+                frontier.append((neighbour, level+1))
                 frontier_set.add(neighbour)
                 parent_map [neighbour] = cur
                 
