@@ -94,6 +94,39 @@ def set_state():
         print(i,tile_rect_pos)
         state[tile_rect_pos]=f"{i}"
     
+def auto_animation(prev=False):
+    if not solved_moves_list:
+        return
+    global solved_moves_cnt, to_tile, state, selected, moving
+    cur_state = solved_moves_list[solved_moves_cnt]
+    # print(solved_moves_list)
+    if prev:
+        if solved_moves_cnt==0:
+            print("Here1")
+            return
+        for i in range(9):
+            if cur_state[i]=='_':
+                solved_moves_cnt-=1
+                state = list(solved_moves_list[solved_moves_cnt])
+                selected = int(state[i])
+                to_tile=(START_POINT[0]+TILE_WIDTH*(i%3),START_POINT[1]+TILE_WIDTH*(i//3))
+                moving = True
+                return
+    else:
+        if solved_moves_cnt >= len(solved_moves_list)-1:
+            print("Here1")
+            return
+        for i in range(9):
+            if cur_state[i]=='_':
+                solved_moves_cnt+=1
+                state = list(solved_moves_list[solved_moves_cnt])
+                selected = int(state[i])
+                to_tile=(START_POINT[0]+TILE_WIDTH*(i%3),START_POINT[1]+TILE_WIDTH*(i//3))
+                moving = True
+                print("WOrkes")
+                return
+
+
 def move_tile_animation():
     # get child
     global solved_moves_cnt, to_tile, state
@@ -127,7 +160,47 @@ tiles = {
 tiles_rects:dict[int, pygame.Rect] = {}
 rects_init()
 
-text_font=pygame.font.Font('Font/Pixeltype.ttf',40)
+text_font=pygame.font.Font('Font/Pixeltype.ttf',50)
+
+solve_dfs_text = text_font.render("SOLVE DFS",False,"White")
+solve_dfs_text_rect = solve_dfs_text.get_rect(topleft = (30, 50))
+
+solve_bfs_text = text_font.render("SOLVE BFS",False,"White")
+solve_bfs_text_rect = solve_bfs_text.get_rect(topleft = (30, 120))
+
+solve_manhattan_text = text_font.render("A* Manhattan",False,"White")
+solve_manhattan_text_rect = solve_manhattan_text.get_rect(topleft = (30, 190))
+
+solve_euc_text = text_font.render("A* Euclidean",False,"White")
+solve_euc_text_rect = solve_euc_text.get_rect(topleft = (30, 260))
+
+show_text = text_font.render("Show Moves",False,"White")
+show_text_rect = show_text.get_rect(topleft = (30, 330))
+
+next_text = text_font.render("Next",False,"White")
+next_text_rect = next_text.get_rect(topleft = (30, 400))
+
+prev_text = text_font.render("Prev",False,"White")
+prev_text_rect = prev_text.get_rect(topleft = (30, 470))
+
+
+
+path_cost_text = text_font.render("Path Cost:",False,"Green")
+path_cost_text_rect = path_cost_text.get_rect(topleft = (30, 800))
+
+nodes_text = text_font.render("Nodes Expanded:",False,"Green")
+nodes_text_rect = nodes_text.get_rect(topleft = (30, 470))
+
+depth_text = text_font.render("Search Depth:",False,"Green")
+depth_text_rect = depth_text.get_rect(topleft = (30, 470))
+
+time_text = text_font.render("Time:",False,"Green")
+time_text_rect = time_text.get_rect(topleft = (30, 470))
+
+
+
+
+
 # 1: play game, 2: setup board
 play_mode = SET_UP_BOARD
 
@@ -141,10 +214,14 @@ selected = 0
 state = "_________"
 state=list(state)
 
+depth = 0
+time = 0
+nodes_expanded = 0
+path_cost = 0
 
 to_tile = (0,0)
 from_tile = 0
-TILE_SPEED=7
+TILE_SPEED=11
 POINT_CURSOR = 11
 NORMAL_CURSOR = 0
 
@@ -160,13 +237,11 @@ start_button = pygame.image.load('Tiles/play.png').convert_alpha()
 start_button = pygame.transform.rotozoom(start_button,0,0.4)
 start_button_rect = start_button.get_rect(topleft=(30,50))
 
-solve_button_rect = pygame.Rect(30,50,200,50)
-show_moves_rect = pygame.Rect(30,150,200,50)
 show_solved_moves_animation = False
 solved_moves_list:list[str] = []
 solved_moves_cnt:int=0
 mouse_down = False
-
+ready_to_animate = False
 
 
 while game_active:
@@ -191,9 +266,10 @@ while game_active:
 
     # playing
     if play_mode==PLAY_GAME:
-        pygame.draw.rect(screen, "Green", solve_button_rect)
-        pygame.draw.rect(screen, "Red", show_moves_rect)
-        if show_solved_moves_animation:
+        
+        if moving:
+            move_tile()
+        elif show_solved_moves_animation:
             if moving:
                 move_tile()
             else:
@@ -202,40 +278,71 @@ while game_active:
                 print("moving ", to_tile)
                 print("moving tile ", selected)
                 if selected == -1:
-                    solved_moves_cnt=0
-                    solved_moves_list.clear()
+                    # solved_moves_list.clear()
                     show_solved_moves_animation = False
                     moving = False
         elif mouse_down:
             mouse_down=False
+            screen.blit(solve_bfs_text, solve_bfs_text_rect)
+            screen.blit(solve_dfs_text, solve_bfs_text_rect)
+            screen.blit(solve_manhattan_text, solve_manhattan_text_rect)
+            screen.blit(solve_euc_text, solve_euc_text_rect)
+            screen.blit(show_text, show_text_rect)
+            screen.blit(next_text, next_text_rect)
+            screen.blit(prev_text, prev_text_rect)
             mouse_pos = mouse.get_pos()
-            if solve_button_rect.collidepoint(mouse_pos):
+            parents = []
+            if solve_bfs_text_rect.collidepoint(mouse_pos):
                 parents = ai_algorithms.BFS("".join(state))
-                if parents == None:
-                    print("Not solvable")
-                    solved_moves_list = None
-                else:
-                    sol = "_12345678"
+            elif solve_dfs_text_rect.collidepoint(mouse_pos):
+                parents = ai_algorithms.DFS("".join(state))
+            # elif solve_manhattan_text_rect.collidepoint(mouse_pos):
+            #     parents = ai_algorithms.BFS("".join(state))
+            # elif solve_euc_text_rect.collidepoint(mouse_pos):
+            #     parents = ai_algorithms.BFS("".join(state))
+            elif next_text_rect.collidepoint(mouse_pos):
+                print("HEHEHHEHE")
+                auto_animation(False)
+            elif prev_text_rect.collidepoint(mouse_pos):
+                auto_animation(True)
+            if parents == None:
+                print("Not solvable")
+                solved_moves_list = []
+            elif len(parents)!=0:
+                # print("Parents",parents)
+                sol = "_12345678"
+                solved_moves_list.clear()
+                solved_moves_list.append(sol)
+                while parents[sol] != sol:
+                    sol = parents[sol]
                     solved_moves_list.append(sol)
-                    while parents[sol] != sol:
-                        sol = parents[sol]
-                        solved_moves_list.append(sol)
-                    solved_moves_list.reverse()
-            elif show_moves_rect.collidepoint(mouse_pos):
-                if solved_moves_list!=None:
+                ready_to_animate= len(solved_moves_list)>0
+                solved_moves_cnt=0
+                print("Depth:", ai_algorithms.depth)
+                solved_moves_list.reverse()
+                print(len(solved_moves_list))
+            elif show_text_rect.collidepoint(mouse_pos):
+                if ready_to_animate and solved_moves_cnt < len(solved_moves_list) - 1:
                     print("start animation")
                     print(solved_moves_list)
                     show_solved_moves_animation=True
 
-        elif not moving:
+        else:
+            screen.blit(solve_bfs_text, solve_bfs_text_rect)
+            screen.blit(solve_dfs_text, solve_dfs_text_rect)
+            screen.blit(solve_manhattan_text, solve_manhattan_text_rect)
+            screen.blit(solve_euc_text, solve_euc_text_rect)
+            screen.blit(show_text, show_text_rect)
+            screen.blit(next_text, next_text_rect)
+            screen.blit(prev_text, prev_text_rect)
             if mouse.get_pressed()[0]:
                 selected=check_select(mouse.get_pos())
 
                 if selected!=-1 and check_move(selected):
                     moving=True
-                    print("moving")
-        else:
-            move_tile()
+                    ready_to_animate=False
+                    solved_moves_list=[]
+                    print("STTATATATAT")
     # start screen 
     elif play_mode==SET_UP_BOARD:
         mouse_pos=mouse.get_pos()
