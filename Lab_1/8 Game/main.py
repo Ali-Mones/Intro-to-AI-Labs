@@ -1,4 +1,4 @@
-import pygame
+import pygame, time
 from sys import exit
 
 import ai_algorithms
@@ -25,7 +25,6 @@ PLAY_GAME = 2
 SET_UP_BOARD = 1
 TILE_WIDTH = 134
 def rects_init():
-    sty=0
     sty=START_POINT[1]
     for i in [1,4,7]:
         stx=START_POINT[0]
@@ -144,7 +143,23 @@ def move_tile_animation():
             return tile_to_move
 
 
-
+def jumb_to_final():
+    global solved_moves_cnt, state
+    solved_moves_cnt = len(solved_moves_list) - 1
+    cur_state = solved_moves_list[solved_moves_cnt]
+    state = list(cur_state)
+    sty=START_POINT[1]
+    stx=START_POINT[0]
+    xstep = 0 
+    ystep = 0
+    for ch in cur_state:
+        if ch != "_":
+            el = int(ch)
+            tiles_rects[el].topleft = (stx+xstep*TILE_WIDTH,sty+ystep*TILE_WIDTH)
+        xstep+=1
+        if xstep == 3:
+            xstep = 0
+            ystep+=1
         
 
 tiles = {
@@ -183,19 +198,21 @@ next_text_rect = next_text.get_rect(topleft = (30, 400))
 prev_text = text_font.render("Prev",False,"White")
 prev_text_rect = prev_text.get_rect(topleft = (30, 470))
 
+jumb_text = text_font.render("Jumb to end",False,"White")
+jumb_text_rect = jumb_text.get_rect(topleft = (30, 540))
 
 
 path_cost_text = text_font.render("Path Cost:",False,"Green")
-path_cost_text_rect = path_cost_text.get_rect(topleft = (30, 800))
+path_cost_text_rect = path_cost_text.get_rect(topleft = (700, 50))
 
 nodes_text = text_font.render("Nodes Expanded:",False,"Green")
-nodes_text_rect = nodes_text.get_rect(topleft = (30, 470))
+nodes_text_rect = nodes_text.get_rect(topleft = (700, 150))
 
 depth_text = text_font.render("Search Depth:",False,"Green")
-depth_text_rect = depth_text.get_rect(topleft = (30, 470))
+depth_text_rect = depth_text.get_rect(topleft = (700, 250))
 
 time_text = text_font.render("Time:",False,"Green")
-time_text_rect = time_text.get_rect(topleft = (30, 470))
+time_text_rect = time_text.get_rect(topleft = (700, 350))
 
 
 
@@ -215,7 +232,7 @@ state = "_________"
 state=list(state)
 
 depth = 0
-time = 0
+time_spent = 0
 nodes_expanded = 0
 path_cost = 0
 
@@ -242,6 +259,9 @@ solved_moves_list:list[str] = []
 solved_moves_cnt:int=0
 mouse_down = False
 ready_to_animate = False
+
+
+
 
 
 while game_active:
@@ -290,8 +310,23 @@ while game_active:
             screen.blit(show_text, show_text_rect)
             screen.blit(next_text, next_text_rect)
             screen.blit(prev_text, prev_text_rect)
+            
+            screen.blit(path_cost_text, path_cost_text_rect)
+            screen.blit(text_font.render(f"{path_cost}", False, "Yellow"), (700, 100))
+
+            screen.blit(nodes_text, nodes_text_rect)
+            screen.blit(text_font.render(f"{nodes_expanded}", False, "Yellow"), (700, 200))
+
+            screen.blit(depth_text, depth_text_rect)
+            screen.blit(text_font.render(f"{depth}", False, "Yellow"), (700, 300))
+
+            screen.blit(time_text, time_text_rect)
+            screen.blit(text_font.render(f"{time_spent} ms", False, "Yellow"), (700, 400))
+
+            screen.blit(jumb_text, jumb_text_rect)
             mouse_pos = mouse.get_pos()
             parents = []
+            start = time.time()
             if solve_bfs_text_rect.collidepoint(mouse_pos):
                 parents = ai_algorithms.BFS("".join(state))
             elif solve_dfs_text_rect.collidepoint(mouse_pos):
@@ -300,8 +335,8 @@ while game_active:
             #     parents = ai_algorithms.BFS("".join(state))
             # elif solve_euc_text_rect.collidepoint(mouse_pos):
             #     parents = ai_algorithms.BFS("".join(state))
-            elif next_text_rect.collidepoint(mouse_pos):
-                print("HEHEHHEHE")
+            end = time.time()
+            if next_text_rect.collidepoint(mouse_pos):
                 auto_animation(False)
             elif prev_text_rect.collidepoint(mouse_pos):
                 auto_animation(True)
@@ -310,6 +345,9 @@ while game_active:
                 solved_moves_list = []
             elif len(parents)!=0:
                 # print("Parents",parents)
+                nodes_expanded = ai_algorithms.nodes_expanded
+                depth = ai_algorithms.depth
+                time_spent = round((end - start)*1000, 5)
                 sol = "_12345678"
                 solved_moves_list.clear()
                 solved_moves_list.append(sol)
@@ -318,7 +356,8 @@ while game_active:
                     solved_moves_list.append(sol)
                 ready_to_animate= len(solved_moves_list)>0
                 solved_moves_cnt=0
-                print("Depth:", ai_algorithms.depth)
+                path_cost = len(solved_moves_list) - 1
+                print("Depth:", ai_algorithms.nodes_expanded)
                 solved_moves_list.reverse()
                 print(len(solved_moves_list))
             elif show_text_rect.collidepoint(mouse_pos):
@@ -326,6 +365,10 @@ while game_active:
                     print("start animation")
                     print(solved_moves_list)
                     show_solved_moves_animation=True
+            elif jumb_text_rect.collidepoint(mouse_pos):
+                if ready_to_animate:
+                    jumb_to_final()
+                ready_to_animate = False
 
         else:
             screen.blit(solve_bfs_text, solve_bfs_text_rect)
@@ -335,9 +378,23 @@ while game_active:
             screen.blit(show_text, show_text_rect)
             screen.blit(next_text, next_text_rect)
             screen.blit(prev_text, prev_text_rect)
+
+            screen.blit(path_cost_text, path_cost_text_rect)
+            screen.blit(text_font.render(f"{path_cost}", False, "Yellow"), (700, 100))
+
+            screen.blit(nodes_text, nodes_text_rect)
+            screen.blit(text_font.render(f"{nodes_expanded}", False, "Yellow"), (700, 200))
+
+            screen.blit(depth_text, depth_text_rect)
+            screen.blit(text_font.render(f"{depth}", False, "Yellow"), (700, 300))
+
+            screen.blit(time_text, time_text_rect)
+            screen.blit(text_font.render(f"{time_spent} ms", False, "Yellow"), (700, 400))
+
+            screen.blit(jumb_text, jumb_text_rect)
             if mouse.get_pressed()[0]:
                 selected=check_select(mouse.get_pos())
-
+                print("8**************",selected)
                 if selected!=-1 and check_move(selected):
                     moving=True
                     ready_to_animate=False
