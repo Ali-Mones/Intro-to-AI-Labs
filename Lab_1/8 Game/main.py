@@ -214,7 +214,8 @@ depth_text_rect = depth_text.get_rect(topleft = (700, 250))
 time_text = text_font.render("Time:",False,"Green")
 time_text_rect = time_text.get_rect(topleft = (700, 350))
 
-
+unsolvable_text = text_font.render("Unsolvable:'(",False,"Blue")
+unsolvable_text_rect = unsolvable_text.get_rect(topleft = (700, 450))
 
 
 
@@ -260,7 +261,7 @@ solved_moves_cnt:int=0
 mouse_down = False
 ready_to_animate = False
 
-
+unsolvable = False
 
 
 
@@ -324,6 +325,9 @@ while game_active:
             screen.blit(text_font.render(f"{time_spent} ms", False, "Yellow"), (700, 400))
 
             screen.blit(jumb_text, jumb_text_rect)
+
+            if unsolvable:
+                screen.blit(unsolvable_text, unsolvable_text_rect)
             mouse_pos = mouse.get_pos()
             parents = []
             start = time.time()
@@ -342,9 +346,15 @@ while game_active:
                 auto_animation(True)
             if parents == None:
                 print("Not solvable")
+                unsolvable=True
                 solved_moves_list = []
+                nodes_expanded = ai_algorithms.nodes_expanded
+                depth = ai_algorithms.depth
+                time_spent = round((end - start)*1000, 5)
+                path_cost = 0
             elif len(parents)!=0:
                 # print("Parents",parents)
+                unsolvable=False
                 nodes_expanded = ai_algorithms.nodes_expanded
                 depth = ai_algorithms.depth
                 time_spent = round((end - start)*1000, 5)
@@ -392,6 +402,9 @@ while game_active:
             screen.blit(text_font.render(f"{time_spent} ms", False, "Yellow"), (700, 400))
 
             screen.blit(jumb_text, jumb_text_rect)
+
+            if unsolvable:
+                screen.blit(unsolvable_text, unsolvable_text_rect)
             if mouse.get_pressed()[0]:
                 selected=check_select(mouse.get_pos())
                 print("8**************",selected)
