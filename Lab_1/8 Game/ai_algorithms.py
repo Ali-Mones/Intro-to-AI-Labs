@@ -111,6 +111,7 @@ def getpos(pos):
     col = pos%3
     return (row,col)
 
+
 # ----------------A* Manhattan----------------------     
 def M_Heuristic(state:str):
     
@@ -124,17 +125,15 @@ def M_Heuristic(state:str):
 
     return heuristic
              
-
-
 def AStarManhattan(init_state:str) -> dict[str,str]:
     global parent_map , explored , search_depth, depth, nodes_expanded
     parent_map.clear()
     explored.clear()
     search_depth = 0
     Pmap:dict[str,tuple(str,int)] = {}
-    frontier : PriorityQueue[tuple(str,int)] = PriorityQueue()
+    frontier : PriorityQueue[tuple(int,str)] = PriorityQueue()
     init_heur = M_Heuristic(init_state)
-    frontier.put((init_state,init_heur))
+    frontier.put((init_heur,init_state))
     # ask question 
     frontier_set : set[str] = set()
     frontier_set.add(init_state)
@@ -143,37 +142,33 @@ def AStarManhattan(init_state:str) -> dict[str,str]:
     
     while frontier:
         
-        state = frontier.get()
-        G = state[1] - M_Heuristic(state[0])
-        if(state[0] in explored):
+        f,state = frontier.get()
+        G = f - M_Heuristic(state)
+        if(state in explored):
             continue
         
-        explored.add(state[0])
-        if state[0] == "_12345678" :
+        explored.add(state)
+        if state == "_12345678" :
             nodes_expanded = len(explored)
-            print("path Cost : ",Pmap[state[0]][1])
             return parent_map
         
-        neighbours = get_neighbours(state[0])
+        neighbours = get_neighbours(state)
         for neighbour in neighbours : 
             if not (neighbour in frontier_set or neighbour in explored) :
                 heur = M_Heuristic(neighbour)
                 cost = G + 1 + heur
-                frontier.put((neighbour,cost))
+                frontier.put((cost,neighbour))
                 frontier_set.add(neighbour)
-                parent_map[neighbour] = state[0]
-                Pmap[neighbour] = (state[0],G + 1)
+                parent_map[neighbour] = state
+                Pmap[neighbour] = (state,G + 1)
             elif neighbour in frontier_set:
                 if(G + 1 < Pmap[neighbour][1]):
-                    Pmap[neighbour] = (state[0],G+1)   
-                    parent_map[neighbour] = state[0] 
+                    Pmap[neighbour] = (state,G+1)   
+                    parent_map[neighbour] = state 
                          
     nodes_expanded = len(explored)
     return None 
 
-    
-    
-    
 # ----------------A* Euclidean---------------------- 
 def E_Heuristic(state:str):
     
@@ -185,9 +180,7 @@ def E_Heuristic(state:str):
             dist = sqrt(pow(curr_pos[0]-req_pos[0],2) + pow(curr_pos[1]-req_pos[1],2))
             heuristic+=dist
     
-    return heuristic
-            
-            
+    return heuristic        
             
 def AStarEuclidean(init_state:str) -> dict[str,str]:
     global parent_map , explored , search_depth, depth, nodes_expanded
@@ -195,9 +188,9 @@ def AStarEuclidean(init_state:str) -> dict[str,str]:
     explored.clear()
     search_depth = 0
     Pmap:dict[str,tuple(str,int)] = {}
-    frontier : PriorityQueue[tuple(str,float)] = PriorityQueue()
+    frontier : PriorityQueue[tuple(int,str)] = PriorityQueue()
     init_heur = E_Heuristic(init_state)
-    frontier.put((init_state,init_heur))
+    frontier.put((init_heur,init_state))
     # ask question 
     frontier_set : set[str] = set()
     frontier_set.add(init_state)
@@ -206,29 +199,29 @@ def AStarEuclidean(init_state:str) -> dict[str,str]:
     
     while frontier:
         
-        state = frontier.get()
-        G = state[1] - E_Heuristic(state[0])
-        if(state[0] in explored):
+        f,state = frontier.get()
+        G = f - E_Heuristic(state)
+        if(state in explored):
             continue
         
-        explored.add(state[0])
-        if state[0] == "_12345678" :
+        explored.add(state)
+        if state == "_12345678" :
             nodes_expanded = len(explored)
             return parent_map
         
-        neighbours = get_neighbours(state[0])
+        neighbours = get_neighbours(state)
         for neighbour in neighbours : 
             if not (neighbour in frontier_set or neighbour in explored) :
                 heur = E_Heuristic(neighbour)
                 cost = G + 1 + heur
-                frontier.put((neighbour,cost))
+                frontier.put((cost,neighbour))
                 frontier_set.add(neighbour)
-                parent_map[neighbour] = state[0]
-                Pmap[neighbour] = (state[0],G + 1) 
+                parent_map[neighbour] = state
+                Pmap[neighbour] = (state,G + 1)
             elif neighbour in frontier_set:
                 if(G + 1 < Pmap[neighbour][1]):
-                    Pmap[neighbour] = (state[0],G+1)  
-                    parent_map[neighbour] = state[0]      
-    
+                    Pmap[neighbour] = (state,G+1)   
+                    parent_map[neighbour] = state 
+                         
     nodes_expanded = len(explored)
     return None 

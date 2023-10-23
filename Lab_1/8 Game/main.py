@@ -175,7 +175,7 @@ tiles = {
 tiles_rects:dict[int, pygame.Rect] = {}
 rects_init()
 
-text_font=pygame.font.Font('Font/Pixeltype.ttf',50)
+text_font=pygame.font.Font('Font/pixeltype.ttf',50)
 
 solve_dfs_text = text_font.render("SOLVE DFS",False,"White")
 solve_dfs_text_rect = solve_dfs_text.get_rect(topleft = (30, 50))
@@ -304,6 +304,15 @@ while game_active:
                     moving = False
         elif mouse_down:
             mouse_down=False
+            
+            #left BK
+            pygame.draw.rect(background,(0,0,76), (10, 10, 227, 580))
+            pygame.draw.rect(background, pygame.Color("black"), (10, 10, 227, 580), width=5)
+            
+            #right BK
+            pygame.draw.rect(background,(0,0,76), (690 , 10, 280, 580))
+            pygame.draw.rect(background, pygame.Color("black"), (690, 10, 280, 580), width=5)
+            
             screen.blit(solve_bfs_text, solve_bfs_text_rect)
             screen.blit(solve_dfs_text, solve_bfs_text_rect)
             screen.blit(solve_manhattan_text, solve_manhattan_text_rect)
@@ -385,6 +394,14 @@ while game_active:
                 ready_to_animate = False
 
         else:
+            #left BK
+            pygame.draw.rect(background,(0,0,76), (10, 10, 227, 580))
+            pygame.draw.rect(background, pygame.Color("black"), (10, 10, 227, 580), width=5)
+            
+            #right BK
+            pygame.draw.rect(background,(0,0,76), (690 , 10, 280, 580))
+            pygame.draw.rect(background, pygame.Color("black"), (690, 10, 280, 580), width=5)
+            
             screen.blit(solve_bfs_text, solve_bfs_text_rect)
             screen.blit(solve_dfs_text, solve_dfs_text_rect)
             screen.blit(solve_manhattan_text, solve_manhattan_text_rect)
