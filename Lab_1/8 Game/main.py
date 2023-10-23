@@ -328,22 +328,26 @@ while game_active:
 
             if unsolvable:
                 screen.blit(unsolvable_text, unsolvable_text_rect)
+                
             mouse_pos = mouse.get_pos()
             parents = []
             start = time.time()
+            
             if solve_bfs_text_rect.collidepoint(mouse_pos):
                 parents = ai_algorithms.BFS("".join(state))
             elif solve_dfs_text_rect.collidepoint(mouse_pos):
                 parents = ai_algorithms.DFS("".join(state))
-            # elif solve_manhattan_text_rect.collidepoint(mouse_pos):
-            #     parents = ai_algorithms.BFS("".join(state))
-            # elif solve_euc_text_rect.collidepoint(mouse_pos):
-            #     parents = ai_algorithms.BFS("".join(state))
+            elif solve_manhattan_text_rect.collidepoint(mouse_pos):
+                parents = ai_algorithms.AStarManhattan("".join(state))
+            elif solve_euc_text_rect.collidepoint(mouse_pos):
+                parents = ai_algorithms.AStarEuclidean("".join(state))
             end = time.time()
+            
             if next_text_rect.collidepoint(mouse_pos):
                 auto_animation(False)
             elif prev_text_rect.collidepoint(mouse_pos):
                 auto_animation(True)
+                
             if parents == None:
                 print("Not solvable")
                 unsolvable=True

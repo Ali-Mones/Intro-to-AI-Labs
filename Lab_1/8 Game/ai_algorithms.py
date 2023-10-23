@@ -8,7 +8,7 @@ depth: int = 0
 nodes_expanded = 0
 
 
-def get_neighbours (state ) ->list[str] :
+def get_neighbours (state) ->list[str] :
     pos = 0
     for i in range(9):
         if state[i] == "_" :
@@ -118,7 +118,7 @@ def M_Heuristic(state:str):
     for i in range(len(state)):
         if(state[i] != '_'):
             curr_pos = getpos(i)
-            req_pos =  getpos(state[i]-'0')
+            req_pos =  getpos(ord(state[i])-ord('0'))
             dist = abs(curr_pos[0]-req_pos[0]) + abs(curr_pos[1]-req_pos[1])
             heuristic+=dist
 
@@ -126,7 +126,7 @@ def M_Heuristic(state:str):
              
 
 
-def AStarManhattan(init_state) -> dict[str,str]:
+def AStarManhattan(init_state:str) -> dict[str,str]:
     global parent_map , explored , search_depth
     parent_map.clear()
     explored.clear()
@@ -138,7 +138,7 @@ def AStarManhattan(init_state) -> dict[str,str]:
     # ask question 
     frontier_set : set[str] = set()
     frontier_set.add(init_state)
-    Pmap[init_state] = (init_state,init_heur)
+    Pmap[init_state] = (init_state,0)
     parent_map[init_state] = init_state
     
     while frontier:
@@ -149,10 +149,10 @@ def AStarManhattan(init_state) -> dict[str,str]:
             continue
         
         explored.add(state[0])
-        if state == "_12345678" :
+        if state[0] == "_12345678" :
             return parent_map
         
-        neighbours = get_neighbours(state)
+        neighbours = get_neighbours(state[0])
         for neighbour in neighbours : 
             if not (neighbour in frontier_set or neighbour in explored) :
                 heur = M_Heuristic(neighbour)
@@ -178,7 +178,7 @@ def E_Heuristic(state:str):
     for i in range(len(state)):
         if(state[i] != '_'):
             curr_pos = getpos(i)
-            req_pos =  getpos(state[i]-'0')
+            req_pos =  getpos(ord(state[i])-ord('0'))
             dist = sqrt(pow(curr_pos[0]-req_pos[0],2) + pow(curr_pos[1]-req_pos[1],2))
             heuristic+=dist
     
@@ -186,7 +186,7 @@ def E_Heuristic(state:str):
             
             
             
-def AStarEuclidean(init_state) -> dict[str,str]:
+def AStarEuclidean(init_state:str) -> dict[str,str]:
     global parent_map , explored , search_depth
     parent_map.clear()
     explored.clear()
@@ -198,7 +198,7 @@ def AStarEuclidean(init_state) -> dict[str,str]:
     # ask question 
     frontier_set : set[str] = set()
     frontier_set.add(init_state)
-    Pmap[init_state] = (init_state,init_heur)
+    Pmap[init_state] = (init_state,0)
     parent_map[init_state] = init_state
     
     while frontier:
@@ -209,10 +209,10 @@ def AStarEuclidean(init_state) -> dict[str,str]:
             continue
         
         explored.add(state[0])
-        if state == "_12345678" :
+        if state[0] == "_12345678" :
             return parent_map
         
-        neighbours = get_neighbours(state)
+        neighbours = get_neighbours(state[0])
         for neighbour in neighbours : 
             if not (neighbour in frontier_set or neighbour in explored) :
                 heur = E_Heuristic(neighbour)
