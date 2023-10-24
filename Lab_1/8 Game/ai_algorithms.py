@@ -2,6 +2,15 @@ from collections import deque
 from queue import PriorityQueue
 from math import sqrt
 
+def get_path(parent: dict[str, str]):
+    path: deque[str] = deque()
+    state = '_12345678'
+
+    while parent[state] != state:
+        path.appendleft(state)
+        state = parent[state]
+
+    return path
 
 def get_neighbours(state) -> list[str]:
     pos = 0

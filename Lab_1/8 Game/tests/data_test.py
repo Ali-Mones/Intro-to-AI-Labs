@@ -4,10 +4,7 @@ import ai_algorithms as ai
 import time
 import threading
 
-import unittest
-
-
-class WidgetTestCase(unittest.TestCase):
+class DataTestCase(unittest.TestCase):
     def setUp(self):
         with open("Lab_1/8 Game/solvable.txt") as file:
             file_str = file.read()
@@ -23,14 +20,14 @@ class WidgetTestCase(unittest.TestCase):
 
         return size
 
-    def depth_algorithm_wrapper(self, init_state, fun, result_list):
+    def algorithm_wrapper(self, init_state, fun, result_list):
         t = time.thread_time_ns()
         result = fun(init_state)
         t = time.thread_time_ns() - t
         result_list.append(result)
         result_list.append(t / 1e6)
 
-    def test_depth(self):
+    def test_data(self):
         total_times = [0, 0, 0, 0]
         total_path_lengths = [0, 0, 0, 0]
         total_nodes_expanded = [0, 0, 0, 0]
@@ -48,17 +45,19 @@ class WidgetTestCase(unittest.TestCase):
             manhattan = []
 
             dfs_thread = threading.Thread(
-                target=self.depth_algorithm_wrapper, args=[state, ai.DFS, dfs]
+                target=self.algorithm_wrapper, 
+                args=[state, ai.DFS, dfs]
             )
             bfs_thread = threading.Thread(
-                target=self.depth_algorithm_wrapper, args=[state, ai.BFS, bfs]
+                target=self.algorithm_wrapper,
+                args=[state, ai.BFS, bfs]
             )
             euclidean_thread = threading.Thread(
-                target=self.depth_algorithm_wrapper,
+                target=self.algorithm_wrapper,
                 args=[state, ai.AStarEuclidean, euclidean],
             )
             manhattan_thread = threading.Thread(
-                target=self.depth_algorithm_wrapper,
+                target=self.algorithm_wrapper,
                 args=[state, ai.AStarManhattan, manhattan],
             )
 
