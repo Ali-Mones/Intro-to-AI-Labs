@@ -104,21 +104,25 @@ init state = 4 _ 1
 
 ------------------DFS------------------
 time = 707.9996 ms
+max search depth = 66123
 number of nodes expanded = 181440
 ---------------------------------------
 
 ------------------BFS------------------
 time = 807.8644 ms
+max search depth = 31
 number of nodes expanded = 181440
 ---------------------------------------
 
 ------------------AStarEuclidean------------------
 time = 5022.6734 ms
+max search depth = 0
 number of nodes expanded = 181440
 --------------------------------------------------
 
 ------------------AStarManhattan------------------
 time = 4575.4258 ms
+max search depth = 0
 number of nodes expanded = 181440
 --------------------------------------------------
 
@@ -133,20 +137,24 @@ init state = 2 6 4
 
 ------------------DFS------------------
 time = 687.5625 ms
+max search depth = 66123
 number of nodes expanded = 181440
 ---------------------------------------
 
 ------------------BFS------------------
 time = 731.2709 ms
+max search depth = 31
 number of nodes expanded = 181440
 ---------------------------------------
 
 ------------------AStarEuclidean------------------
 time = 4104.6774 ms
+max search depth = 0
 number of nodes expanded = 181440
 --------------------------------------------------
 
 ------------------AStarManhattan------------------
 time = 3189.2672 ms
+max search depth = 0
 number of nodes expanded = 181440
 --------------------------------------------------

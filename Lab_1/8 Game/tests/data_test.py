@@ -4,6 +4,7 @@ import ai_algorithms as ai
 import time
 import threading
 
+
 class DataTestCase(unittest.TestCase):
     def setUp(self):
         with open("Lab_1/8 Game/solvable.txt") as file:
@@ -45,12 +46,10 @@ class DataTestCase(unittest.TestCase):
             manhattan = []
 
             dfs_thread = threading.Thread(
-                target=self.algorithm_wrapper, 
-                args=[state, ai.DFS, dfs]
+                target=self.algorithm_wrapper, args=[state, ai.DFS, dfs]
             )
             bfs_thread = threading.Thread(
-                target=self.algorithm_wrapper,
-                args=[state, ai.BFS, bfs]
+                target=self.algorithm_wrapper, args=[state, ai.BFS, bfs]
             )
             euclidean_thread = threading.Thread(
                 target=self.algorithm_wrapper,
