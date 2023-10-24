@@ -140,9 +140,10 @@ def AStarManhattan(init_state:str) -> dict[str,str]:
     Pmap[init_state] = (init_state,0)
     parent_map[init_state] = init_state
     
-    while frontier:
+    while not frontier.empty():
         
         f,state = frontier.get()
+        frontier_set.remove(state)
         G = f - M_Heuristic(state)
         if(state in explored):
             continue
@@ -197,9 +198,10 @@ def AStarEuclidean(init_state:str) -> dict[str,str]:
     Pmap[init_state] = (init_state,0)
     parent_map[init_state] = init_state
     
-    while frontier:
+    while not frontier.empty():
         
         f,state = frontier.get()
+        frontier_set.remove(state)
         G = f - E_Heuristic(state)
         if(state in explored):
             continue
