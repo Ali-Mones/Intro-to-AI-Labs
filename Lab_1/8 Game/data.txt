@@ -1,0 +1,19 @@
+avg time for solvable -- 1000
+dfs         bfs        euclidean  manhattan
+367.453125  313.15625  60.078125  29.9375
+
+avg time for unsolvable -- 30
+dfs         bfs        euclidean  manhattan
+580.7291666 594.270833 3856.25    3192.70833333
+
+avg number of nodes expanded for solvable -- 1000
+dfs         bfs        euclidean  manhattan
+111209.762  91475.992  2418.889   1462.43
+
+avg search depth for solvable -- 1000
+dfs         bfs        euclidean  manhattan
+60038.501   21.817     21.833     21.987
+
+avg path lengths for solvable -- 1000
+dfs         bfs        euclidean  manhattan
+44535.745   21.817     21.829     21.915
