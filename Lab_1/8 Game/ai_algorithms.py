@@ -147,9 +147,10 @@ def AStarManhattan(init_state: str):
     frontier_set.add(init_state)
     Pmap[init_state] = (init_state, 0)
     parent_map[init_state] = init_state
-
+    
     while not frontier.empty():
-        f, state = frontier.get()
+        
+        f,state = frontier.get()
         G = f - M_Heuristic(state)
         if state in explored:
             continue
@@ -161,19 +162,19 @@ def AStarManhattan(init_state: str):
             return True, parent_map, explored, depth, nodes_expanded
 
         neighbours = get_neighbours(state)
-        for neighbour in neighbours:
-            if not (neighbour in frontier_set or neighbour in explored):
-                heur = M_Heuristic(neighbour)
-                cost = G + 1 + heur
-                frontier.put((cost, neighbour))
+        for neighbour in neighbours : 
+            heur = M_Heuristic(neighbour)
+            cost = G + 1 + heur
+            if not (neighbour in frontier_set or neighbour in explored) :
+                frontier.put((cost,neighbour))
                 frontier_set.add(neighbour)
                 parent_map[neighbour] = state
-                Pmap[neighbour] = (state, G + 1)
-            elif neighbour in frontier_set:
-                if G + 1 < Pmap[neighbour][1]:
-                    Pmap[neighbour] = (state, G + 1)
-                    parent_map[neighbour] = state
-
+                Pmap[neighbour] = (state,G + 1)
+            elif (neighbour in frontier_set) and (G + 1 < Pmap[neighbour][1]):
+                Pmap[neighbour] = (state,G+1)   
+                parent_map[neighbour] = state 
+                frontier.put((cost,neighbour))
+                         
     nodes_expanded = len(explored)
     return False, parent_map, explored, depth, nodes_expanded
 
@@ -208,9 +209,10 @@ def AStarEuclidean(init_state: str):
     frontier_set.add(init_state)
     Pmap[init_state] = (init_state, 0)
     parent_map[init_state] = init_state
-
+    
     while not frontier.empty():
-        f, state = frontier.get()
+        
+        f,state = frontier.get()
         G = f - E_Heuristic(state)
         if state in explored:
             continue
@@ -222,18 +224,18 @@ def AStarEuclidean(init_state: str):
             return True, parent_map, explored, depth, nodes_expanded
 
         neighbours = get_neighbours(state)
-        for neighbour in neighbours:
-            if not (neighbour in frontier_set or neighbour in explored):
-                heur = E_Heuristic(neighbour)
-                cost = G + 1 + heur
-                frontier.put((cost, neighbour))
+        for neighbour in neighbours : 
+            heur = E_Heuristic(neighbour)
+            cost = G + 1 + heur
+            if not (neighbour in frontier_set or neighbour in explored) :
+                frontier.put((cost,neighbour))
                 frontier_set.add(neighbour)
                 parent_map[neighbour] = state
-                Pmap[neighbour] = (state, G + 1)
-            elif neighbour in frontier_set:
-                if G + 1 < Pmap[neighbour][1]:
-                    Pmap[neighbour] = (state, G + 1)
-                    parent_map[neighbour] = state
-
+                Pmap[neighbour] = (state,G + 1)
+            elif (neighbour in frontier_set) and (G + 1 < Pmap[neighbour][1]):
+                Pmap[neighbour] = (state,G+1)   
+                parent_map[neighbour] = state 
+                frontier.put((cost,neighbour))
+                         
     nodes_expanded = len(explored)
     return False, parent_map, explored, depth, nodes_expanded
