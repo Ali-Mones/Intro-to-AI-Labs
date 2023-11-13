@@ -83,7 +83,7 @@ x = GAP//2
 score_one = 0
 score_two = 0
 
-text_font = pygame.font.Font('regular_font.otf', 40)
+text_font = pygame.font.Font('font/regular_font.otf', 40)
 
 column_rects:list[pygame.Rect] = []
 for i in range(WIDTH):
