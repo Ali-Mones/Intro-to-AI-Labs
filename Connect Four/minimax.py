@@ -3,6 +3,17 @@ HUMAN = 0
 AI = 1
 EMPTY = 2
 HEIGHT, WIDTH = 6, 7
+m: dict[str, int]={}
+hoz_hue = [1,2,3,4,3,2,1]
+ver_hue = [1,2,3,3,2,1]
+diag_hue = [
+	[0,0,0,1,1,1,1],
+	[0,0,1,2,2,2,1],
+    [0,1,2,3,3,2,1],
+	[1,2,3,3,2,1,0],
+	[1,2,2,2,1,0,0],
+	[1,1,1,1,0,0,0]
+]
 def detect_winner(board):
 	for c in range(WIDTH-3):
 		for r in range(HEIGHT):
@@ -81,6 +92,16 @@ def hueristic(board):
 			group = [board[r][c],board[r-1][c+1],board[r-2][c+2],board[r-3][c+3]]
 			score+= evaluate_group(group)
 	return score
+# def hueristic(board, player):
+# 	score = 69
+# 	for row in range(HEIGHT):
+# 		for col in range(WIDTH):
+# 			if board[row][col] == player:
+# 				score += ver_hue[row]
+# 				score += hoz_hue[col]
+# 				score += diag_hue[row][col]
+# 				score += diag_hue[HEIGHT - 1- row][col]
+# 	return score
 # return best value of childern along with the best move
 
 def parr(board):
@@ -95,19 +116,22 @@ def get_copy(board):
 			c[row].append(board[row][element])
 	return c
 
+def minimax(board:list[list[int]], depth, maximizing: bool, colomn_ind: list[int]):
+	state = "2"*7*6
+	m.clear()
+	state = list(state)
+	for i in range(HEIGHT):
+		for j in range(WIDTH):
+			state[i*WIDTH+j] = chr(board[i][j]+ord('0'))
+	print(state)
+	return minimax2(board, depth, maximizing, colomn_ind, state)
 
-def minimax(board: list[list[int]], depth: int, maximizing: bool, colomn_ind: list[int]) -> (int, int):
+
+def minimax2(board: list[list[int]], depth: int, maximizing: bool, colomn_ind: list[int], state:list[str]) -> (int, int):
 	columns = [int(i) for i in range(len(colomn_ind)) if colomn_ind[i] < HEIGHT]
-	# print("array: ")
-	# parr(board)
-	# print("column_ind:")
-	# print(colomn_ind)
-	# print("columns:")
-	# print(columns)
 	if not columns:
 		print(colomn_ind)
 		winner = detect_winner(board)
-		# print("winner:", winner)
 		if winner==AI:
 			return (math.inf, -1)
 		elif winner == HUMAN:
@@ -120,38 +144,46 @@ def minimax(board: list[list[int]], depth: int, maximizing: bool, colomn_ind: li
 		score = hueristic(board)
 		# parr(board)
 		return (score, -1)
-	
+	state_str = "".join(state)
+	if m.get(state_str):
+		# print("Worked")
+		return (m[state_str], -1)
 	if maximizing:
-		# print(maximizing)
 		value = -math.inf       
 		move = columns[0]
 		for col in columns:
-			new_board = get_copy(board)
-			new_colomn_ind = colomn_ind.copy()
-
-			new_board[HEIGHT-1-colomn_ind[col]][col] = AI
-			new_colomn_ind[col]+=1
-
-			new_value, new_move = minimax(new_board, depth-1, False, new_colomn_ind)
+			board[HEIGHT-1-colomn_ind[col]][col] = AI
+			state[(HEIGHT-1-colomn_ind[col])*WIDTH+col] = chr(AI+ord('0'))
+			colomn_ind[col]+=1
+			new_value, new_move = minimax2(board, depth-1, False, colomn_ind, state)
+			colomn_ind[col]-=1
+			board[HEIGHT-1-colomn_ind[col]][col] = EMPTY
+			state[(HEIGHT-1-colomn_ind[col])*WIDTH+col] = chr(EMPTY+ord('0'))
 			if new_value>value:
 				value=new_value
 				move=col
+		m[state_str] = value
 		return value, move
 	else:
 		# print(maximizing)
 		value = math.inf   
 		move = columns[0]    
 		for col in columns:
-			new_board = get_copy(board)
-			new_colomn_ind = colomn_ind.copy()
+			# new_board = get_copy(board)
+			# new_colomn_ind = colomn_ind.copy()
+			# new_state = state.copy()
+			board[HEIGHT-1-colomn_ind[col]][col] = HUMAN
+			state[(HEIGHT-1-colomn_ind[col])*WIDTH+col] = chr(HUMAN+ord('0'))
+			colomn_ind[col]+=1
 
-			new_board[HEIGHT-1-colomn_ind[col]][col] = HUMAN
-			new_colomn_ind[col]+=1
-
-			new_value, new_move = minimax(new_board, depth-1, True, new_colomn_ind)
+			new_value, new_move = minimax2(board, depth-1, True, colomn_ind, state)
+			colomn_ind[col]-=1
+			board[HEIGHT-1-colomn_ind[col]][col] = EMPTY
+			state[(HEIGHT-1-colomn_ind[col])*WIDTH+col] = chr(EMPTY+ord('0'))
 			if new_value<value:
 				value=new_value
 				move=col
+		m[state_str] = value
 		return value, move
 	
 
