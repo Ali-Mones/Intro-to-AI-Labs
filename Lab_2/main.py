@@ -66,6 +66,7 @@ START_DRAW_X, START_DRAW_Y = START_X+28+RADIUS, 80+RADIUS
 PLAYER_ONE = 0
 PLAYER_TWO = 1
 EMPTY = 2
+gameOver = False
 screen = pygame.display.set_mode((WINDOW_WIDTH,WINDOW_HEIGHT))
 clock = pygame.time.Clock()
 game_acive = True
@@ -99,11 +100,13 @@ while game_acive:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        if player == PLAYER_ONE and event.type == pygame.MOUSEBUTTONDOWN:
+        if not gameOver and player == PLAYER_ONE and event.type == pygame.MOUSEBUTTONDOWN:
             if board_image_rect.collidepoint(mouse.get_pos()):
                 if colomn_ind[selected] < HEIGHT:
                     apply_move(game_grid, selected, colomn_ind, player)
                     score_one = check_score(game_grid, colomn_ind[selected]-1, selected, player,score_one)
+                    if score_one:
+                        gameOver = True
                     played=True
                     
 
@@ -126,36 +129,41 @@ while game_acive:
     screen.blit(score1, score1.get_rect(topright = (950, 20)))
     screen.blit(score2, score2.get_rect(topright = (950, 60)))
 
-    if player==PLAYER_TWO:
-        print(game_grid)
-        value, move = minimax(get_copy(game_grid), 5, True, colomn_ind)
-        print(value, move)
-        apply_move(game_grid, move, colomn_ind, PLAYER_TWO)
-        score_two = check_score(game_grid, colomn_ind[move]-1, move, player,score_two)
-        player = PLAYER_ONE
-    if played:
-         played = False
-         player = PLAYER_TWO
-    if board_image_rect.collidepoint(mouse.get_pos()):
-        selected = (mouse.get_pos()[0]-GAP//2)//select_shift-1
-        if selected<0: selected=0
-        elif selected>=WIDTH: selected=WIDTH-1
-        # print(selected)
-        mouse.set_cursor(11)
+    if not gameOver:
+        if player==PLAYER_TWO:
+            print(game_grid)
+            value, move = minimax(get_copy(game_grid), 5, True, colomn_ind)
+            print(value, move)
+            apply_move(game_grid, move, colomn_ind, PLAYER_TWO)
+            score_two = check_score(game_grid, colomn_ind[move]-1, move, player,score_two)
+            player = PLAYER_ONE
+        if played:
+            played = False
+            player = PLAYER_TWO
+        if board_image_rect.collidepoint(mouse.get_pos()):
+            selected = (mouse.get_pos()[0]-GAP//2)//select_shift-1
+            if selected<0: selected=0
+            elif selected>=WIDTH: selected=WIDTH-1
+            # print(selected)
+            mouse.set_cursor(11)
+        else:
+            mouse.set_cursor(0)
+        # for i in range(len(column_rects)):
+        #     if (mouse.get_pos())
+        if score_two:
+            gameOver = True
+
+        # Draw the arrow
+        if player==PLAYER_ONE:
+            pygame.draw.polygon(screen, "Red", [(START_DRAW_X-RADIUS + selected*select_shift,START_Y-40), (START_DRAW_X-RADIUS+2*RADIUS+selected*select_shift, START_Y-40), (START_DRAW_X-RADIUS+RADIUS+selected*select_shift, START_Y)])
+        else:
+            pygame.draw.polygon(screen, "Yellow", [(START_DRAW_X-RADIUS + selected*select_shift,START_Y-40), (START_DRAW_X-RADIUS+2*RADIUS+selected*select_shift, START_Y-40), (START_DRAW_X-RADIUS+RADIUS+selected*select_shift, START_Y)])
     else:
-        mouse.set_cursor(0)
-    # for i in range(len(column_rects)):
-    #     if (mouse.get_pos())
-
-
-
-
-    # Draw the arrow
-    if player==PLAYER_ONE:
-        pygame.draw.polygon(screen, "Red", [(START_DRAW_X-RADIUS + selected*select_shift,START_Y-40), (START_DRAW_X-RADIUS+2*RADIUS+selected*select_shift, START_Y-40), (START_DRAW_X-RADIUS+RADIUS+selected*select_shift, START_Y)])
-    else:
-        pygame.draw.polygon(screen, "Yellow", [(START_DRAW_X-RADIUS + selected*select_shift,START_Y-40), (START_DRAW_X-RADIUS+2*RADIUS+selected*select_shift, START_Y-40), (START_DRAW_X-RADIUS+RADIUS+selected*select_shift, START_Y)])
-    
+        Winner = "YOU" if score_one else "Computer"
+        win = text_font.render(f"{Winner} WON", False, "Yellow")
+        screen.blit(win, win.get_rect(topright = (950, 200)))
+        
+        
     # print(mouse.get_pos())
     # pygame.draw.circle(screen, "Yellow", (100,100), 100)    
     pygame.display.update()
