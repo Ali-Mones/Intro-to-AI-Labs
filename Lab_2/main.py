@@ -1,5 +1,7 @@
-import pygame
+import pygame, time
 from minimax import minimax
+def get_score(cnt):
+    return max(0, cnt-4+1)
 def check_score(board, row, col, player, score):
     row = HEIGHT - 1 - row
     hoz_cnt_left = 0
@@ -7,42 +9,42 @@ def check_score(board, row, col, player, score):
     for i in range(col, WIDTH):
         if board[row][i]==player: hoz_cnt_left+=1
         else: break
-    for i in range(col-1, -1, -1):
+    for i in range(col, -1, -1):
         if board[row][i]==player: hoz_cnt_right+=1
         else: break
-    if hoz_cnt_left <= 4 and hoz_cnt_right < 4:
-        if hoz_cnt_right + hoz_cnt_left >= 4:
-            score+=1
-
+    score-=get_score(hoz_cnt_left-1)
+    score-=get_score(hoz_cnt_right-1)
+    score+=get_score(hoz_cnt_left+hoz_cnt_right-1)
     ver_cnt = 0
     for i in range(row, HEIGHT):
         if board[i][col]==player: ver_cnt+=1
         else: break
-    if ver_cnt==4:
+    if ver_cnt>=4:
         score += 1
+
     inc_dig_cnt_up = 0
     inc_dig_cnt_down = 0
     for i in range(0, min(row+1, WIDTH-col)):
         if board[row-i][col+i]==player: inc_dig_cnt_up+=1
         else: break
-    for i in range(1, min(col+1, HEIGHT-row)):
+    for i in range(0, min(col+1, HEIGHT-row)):
         if board[row+i][col-i]==player: inc_dig_cnt_down+=1
         else: break
-    if inc_dig_cnt_down < 4 and inc_dig_cnt_up <= 4:
-        if inc_dig_cnt_up + inc_dig_cnt_down >= 4:
-            score+=1
+    score-=get_score(inc_dig_cnt_down-1)
+    score-=get_score(inc_dig_cnt_up-1)
+    score+=get_score(inc_dig_cnt_down+inc_dig_cnt_up-1)
     dec_dig_cnt_up = 0
     dec_dig_cnt_down = 0
     for i in range(0, min(row+1, col+1)):
         if board[row-i][col-i]==player: dec_dig_cnt_up+=1
         else: break
-    for i in range(1, min(HEIGHT-row, WIDTH-col)):
+    for i in range(0, min(HEIGHT-row, WIDTH-col)):
         if board[row+i][col+i]==player: dec_dig_cnt_down+=1
         else: 
             break
-    if dec_dig_cnt_down < 4 and dec_dig_cnt_up <= 4:
-        if dec_dig_cnt_up + dec_dig_cnt_down >= 4:
-            score+=1
+    score-=get_score(dec_dig_cnt_down-1)
+    score-=get_score(dec_dig_cnt_up-1)
+    score+=get_score(dec_dig_cnt_down+dec_dig_cnt_up-1)
     return score
 
 def apply_move(board, col, column_id, player):
@@ -128,7 +130,10 @@ while game_acive:
 
     if player==PLAYER_TWO:
         print(game_grid)
+        start = time.time()
         value, move = minimax(get_copy(game_grid), 5, True, colomn_ind)
+        end = time.time()
+        print(end-start)
         print(value, move)
         apply_move(game_grid, move, colomn_ind, PLAYER_TWO)
         score_two = check_score(game_grid, colomn_ind[move]-1, move, player,score_two)
@@ -160,4 +165,10 @@ while game_acive:
     # pygame.draw.circle(screen, "Yellow", (100,100), 100)    
     pygame.display.update()
     clock.tick(60)
+
+
+
+# state id ----> (value, move, child id)
+tree: dict[int, list[(int, int, int)]]
+
 
