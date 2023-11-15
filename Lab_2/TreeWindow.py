@@ -14,6 +14,7 @@ def createWindow():
 	image = pyglet.image.load('board_image.png')
 	board_image_rect = [230,400]
 	sprite = pyglet.sprite.Sprite(image, x = 230, y = 400)
+	sprite.scale = 0.125
  
 	offset = [0,0]  
 	speed = [0,0]
@@ -65,5 +66,7 @@ def createWindow():
 	pyglet.clock.schedule_interval(lambda y:y, 1/60)
 	pyglet.app.run()
 
+
+createWindow()
 
 
