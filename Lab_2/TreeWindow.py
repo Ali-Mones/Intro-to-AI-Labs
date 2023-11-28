@@ -13,12 +13,24 @@ def createWindow():
 	batch = pyglet.graphics.Batch()
 	image = pyglet.image.load('board_image.png')
 	board_image_rect = [230,400]
-	sprite = pyglet.sprite.Sprite(image, x = 230, y = 400)
+	sprite = pyglet.sprite.Sprite(image, x = 230, y = 400, batch = batch)
 	sprite.scale = 0.125
  
 	offset = [0,0]  
 	speed = [0,0]
-	pos = [width/2,height/2]  
+	pos = [width/2,height/2] 
+ 
+	sprites = []
+	initPos = []
+	# position of images
+	pos_x = -70
+	pos_y = 230
+	for i in range(7):
+		initPos.append([pos_x,pos_y])
+		temp = pyglet.sprite.Sprite(image, pos_x, pos_y, batch = batch)
+		temp.scale = 0.125
+		sprites.append(temp)
+		pos_x = pos_x + 100
 
 	# on draw event 
 	@window.event 
@@ -37,7 +49,13 @@ def createWindow():
 		y = board_image_rect[1] - renderOffset[1]
   
 		sprite.x,sprite.y = x,y
-		sprite.draw()
+  
+		for i in range(7):
+			sprites[i].x = initPos[i][0] - renderOffset[0]
+			sprites[i].y = initPos[i][1] - renderOffset[1]
+   
+   
+		batch.draw()
 
 	@window.event 
 	def on_key_press(symbol, modifier): 
@@ -67,6 +85,4 @@ def createWindow():
 	pyglet.app.run()
 
 
-createWindow()
-
-
+#createWindow()
