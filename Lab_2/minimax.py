@@ -192,21 +192,23 @@ def minimax2(
         print(colomn_ind)
         winner = detect_winner(board)
         if winner == AI:
-            return (math.inf, -1)
+            return (math.inf, -1, 1)
         elif winner == HUMAN:
-            return (-math.inf, -1)
+            return (-math.inf, -1, 1)
         else:
-            return (0, -1)
+            return (0, -1, 1)
 
     if depth == 0:
         # print("depth ended")
         score = hueristic(board)
         # parr(board)
-        return (score, -1)
+        return (score, -1, 1)
     state_str = "".join(state)
     if m.get(state_str):
         # print("Worked")
-        return (m[state_str], -1)
+        return (m[state_str], -1, 1)
+    
+    nodes_expanded = 0
     if maximizing:
         value = -math.inf
         move = columns[0]
@@ -214,7 +216,8 @@ def minimax2(
             board[HEIGHT - 1 - colomn_ind[col]][col] = AI
             state[(HEIGHT - 1 - colomn_ind[col]) * WIDTH + col] = chr(AI + ord("0"))
             colomn_ind[col] += 1
-            new_value, new_move = minimax2(board, depth - 1, False, colomn_ind, state)
+            new_value, new_move, nodes = minimax2(board, depth - 1, False, colomn_ind, state)
+            nodes_expanded += nodes
             colomn_ind[col] -= 1
             board[HEIGHT - 1 - colomn_ind[col]][col] = EMPTY
             state[(HEIGHT - 1 - colomn_ind[col]) * WIDTH + col] = chr(EMPTY + ord("0"))
@@ -222,7 +225,7 @@ def minimax2(
                 value = new_value
                 move = col
         m[state_str] = value
-        return value, move
+        return value, move, nodes_expanded
     else:
         # print(maximizing)
         value = math.inf
@@ -235,7 +238,8 @@ def minimax2(
             state[(HEIGHT - 1 - colomn_ind[col]) * WIDTH + col] = chr(HUMAN + ord("0"))
             colomn_ind[col] += 1
 
-            new_value, new_move = minimax2(board, depth - 1, True, colomn_ind, state)
+            new_value, new_move, nodes = minimax2(board, depth - 1, True, colomn_ind, state)
+            nodes_expanded += nodes
             colomn_ind[col] -= 1
             board[HEIGHT - 1 - colomn_ind[col]][col] = EMPTY
             state[(HEIGHT - 1 - colomn_ind[col]) * WIDTH + col] = chr(EMPTY + ord("0"))
@@ -243,7 +247,7 @@ def minimax2(
                 value = new_value
                 move = col
         m[state_str] = value
-        return value, move
+        return value, move, nodes_expanded
 
 def minimax_alphabeta_impl(
     board: list[list[int]],
@@ -259,21 +263,22 @@ def minimax_alphabeta_impl(
         print(colomn_ind)
         winner = detect_winner(board)
         if winner == AI:
-            return (math.inf, -1)
+            return (math.inf, -1, 1)
         elif winner == HUMAN:
-            return (-math.inf, -1)
+            return (-math.inf, -1, 1)
         else:
-            return (0, -1)
+            return (0, -1, 1)
 
     if depth == 0:
         # print("depth ended")
         score = hueristic(board)
         # parr(board)
-        return (score, -1)
+        return (score, -1, 1)
     state_str = "".join(state)
     if m.get(state_str):
         # print("Worked")
-        return (m[state_str], -1)
+        return (m[state_str], -1, 1)
+    nodes_expanded = 0
     if maximizing:
         value = -math.inf
         move = columns[0]
@@ -281,9 +286,10 @@ def minimax_alphabeta_impl(
             board[HEIGHT - 1 - colomn_ind[col]][col] = AI
             state[(HEIGHT - 1 - colomn_ind[col]) * WIDTH + col] = chr(AI + ord("0"))
             colomn_ind[col] += 1
-            new_value, new_move = minimax_alphabeta_impl(
+            new_value, new_move, nodes = minimax_alphabeta_impl(
                 board, depth - 1, False, colomn_ind, state, alpha, beta
             )
+            nodes_expanded += nodes
             colomn_ind[col] -= 1
             board[HEIGHT - 1 - colomn_ind[col]][col] = EMPTY
             state[(HEIGHT - 1 - colomn_ind[col]) * WIDTH + col] = chr(EMPTY + ord("0"))
@@ -294,7 +300,7 @@ def minimax_alphabeta_impl(
             if alpha >= beta:
                 break
         m[state_str] = value
-        return value, move
+        return value, move, nodes_expanded
     else:
         # print(maximizing)
         value = math.inf
@@ -307,7 +313,8 @@ def minimax_alphabeta_impl(
             state[(HEIGHT - 1 - colomn_ind[col]) * WIDTH + col] = chr(HUMAN + ord("0"))
             colomn_ind[col] += 1
 
-            new_value, new_move = minimax_alphabeta_impl(board, depth - 1, True, colomn_ind, state, alpha, beta)
+            new_value, new_move, nodes = minimax_alphabeta_impl(board, depth - 1, True, colomn_ind, state, alpha, beta)
+            nodes_expanded += nodes
             colomn_ind[col] -= 1
             board[HEIGHT - 1 - colomn_ind[col]][col] = EMPTY
             state[(HEIGHT - 1 - colomn_ind[col]) * WIDTH + col] = chr(EMPTY + ord("0"))
@@ -318,7 +325,7 @@ def minimax_alphabeta_impl(
             if alpha >= beta:
                 break
         m[state_str] = value
-        return value, move
+        return value, move, nodes_expanded
 
 
 # game_grid: list[list[int]] = [[EMPTY]*WIDTH for j in range(HEIGHT)]

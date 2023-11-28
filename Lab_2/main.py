@@ -172,7 +172,7 @@ while game_active:
     if player == PLAYER_TWO:
         print(game_grid)
         start = time.time()
-        value, move = minimax_alphabeta(get_copy(game_grid), 5, True, colomn_ind)
+        value, move, nodes = minimax_alphabeta(get_copy(game_grid), 4, True, colomn_ind)
         end = time.time()
         print(end - start)
         print(value, move)

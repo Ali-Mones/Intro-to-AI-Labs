@@ -152,8 +152,8 @@ def AStarManhattan(init_state: str):
         
         f,state = frontier.get()
         G = f - M_Heuristic(state)
-        if state in explored:
-            continue
+        # if state in explored:
+            # continue
 
         explored.add(state)
         if state == "_12345678":
@@ -214,8 +214,8 @@ def AStarEuclidean(init_state: str):
         
         f,state = frontier.get()
         G = f - E_Heuristic(state)
-        if state in explored:
-            continue
+        # if state in explored:
+            # continue
 
         explored.add(state)
         if state == "_12345678":
