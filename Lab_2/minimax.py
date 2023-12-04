@@ -305,7 +305,7 @@ def minimax_alphabeta_impl(
     if m.get(state_str):
         return (m[state_str], -1, 1)
     nodes_expanded = 0
-
+    columns.sort(key= lambda e: abs(3-e))
     if maximizing:
         value = -math.inf
         move = columns[0]

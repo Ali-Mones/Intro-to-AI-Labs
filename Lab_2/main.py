@@ -201,7 +201,7 @@ while game_active:
         tree_index = 0
         print(game_grid)
         start = time.time()
-        depth: int = 4
+        depth: int = 12
         tree = [None for _ in range(int((7 ** (depth + 1) - 1) / 6))]
         value, move, nodes = minimax_alphabeta(
             get_copy(game_grid), depth, True, colomn_ind, tree
@@ -220,7 +220,8 @@ while game_active:
         played = False
         player = PLAYER_TWO
     if board_image_rect.collidepoint(mouse.get_pos()):
-        selected = (mouse.get_pos()[0] - GAP // 2) // select_shift - 1
+        # selected = (mouse.get_pos()[0] - START_X) // select_shift
+        selected = (mouse.get_pos()[0] - GAP // 2 - START_X) // select_shift
         if selected < 0:
             selected = 0
         elif selected >= WIDTH:
@@ -229,7 +230,7 @@ while game_active:
     else:
         mouse.set_cursor(0)
 
-    # Draw the arrow
+    # Draw the arrow    
     if player == PLAYER_ONE:
         pygame.draw.polygon(
             screen,
@@ -259,3 +260,5 @@ while game_active:
 
     pygame.display.update()
     clock.tick(60)
+
+

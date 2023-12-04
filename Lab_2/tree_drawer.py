@@ -60,7 +60,7 @@ class TreeDrawer:
             pygame.draw.circle(self.surface, (255, 0, 0), (x, y), self.radius)
 
         if value < 0:
-            render_string = "-" + str(-value)
+            render_string = "N" + str(-value)
         else:
             render_string = str(value)
         text = self.font.render(render_string, False, (255, 255, 255))
