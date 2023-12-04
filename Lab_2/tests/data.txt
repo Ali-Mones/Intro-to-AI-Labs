@@ -1,0 +1,75 @@
+{
+    over 100 iterations
+    1: (
+        minimax time: 0.589527,
+        minmax ab time: 0.770576,
+        minimax nodes expanded: 6.28,
+        minimax ab nodes expanded: 6.28
+    )
+    2: (
+        minimax time: 2.668852,
+        minmax ab time: 2.03078,
+        minimax nodes expanded: 40.08,
+        minimax ab nodes expanded: 26.88
+    ) 
+    3: (
+        minimax time: 11.494369,
+        minmax ab time: 6.029689,
+        minimax nodes expanded: 258.84,
+        minimax ab nodes expanded: 128.07
+    ) 
+    4: (
+        minimax time: 50.58515,
+        minmax ab time: 18.403167,
+        minimax nodes expanded: 1247.09,
+        minimax ab nodes expanded: 447.6
+    ) 
+    5: (
+        minimax time: 234.785038,
+        minmax ab time: 64.590183,
+        minimax nodes expanded: 5619.25,
+        minimax ab nodes expanded: 1490.64
+    ) 
+    6: (
+        minimax time: 815.071209,
+        minmax ab time: 185.32483,
+        minimax nodes expanded: 1111.07,
+        minimax ab nodes expanded: 4701.08
+    ), 
+    7: (
+        minimax time: 3183.231483,
+        minmax ab time: 531.34647,
+        minimax nodes expanded: 7452.83,
+        minimax ab nodes expanded: 13012.31
+    ), 
+    8: (
+        minimax time: 10880.319663,
+        minmax ab time: 1839.67476,
+        minimax nodes expanded: 50453.87,
+        minimax ab nodes expanded: 39744.48
+    ),
+
+    over 30 iterations
+    9: (
+        minimax time: 30126.47872,
+        minimax ab time: 3797.0766666666664,
+        minimax nodes expanded: 842564.6,
+        minimax ab nodes expanded: 103320.9
+    ),
+    10: (
+        minimax time: 77054.80931666667,
+        minimax time: 9706.684633333334,
+        minimax nodes expanded: 2506690.1666666665,
+        minimax ab nodes expanded: 294748.4
+    ), 
+    11: (
+        minimax time: 222608.69592,
+        minimax ab time: 23970.43330333333,
+        minimax nodes expanded: 7437531.833333333,
+        minimax ab nodes expanded: 738634.3
+    )
+    12: (
+        minimax ab time: 73679.80964666668,
+        minimax ab nodes expanded: 2086291.0666666667
+    )
+}

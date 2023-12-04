@@ -35,15 +35,17 @@ def time_nodes_diff_depths_test(tests: list[list[list[int]]], count: int, min_de
 
     for i in range(min_depth, max_depth + 1):
         times[i] = time_nodes_test(tests, count, i, with_no_pruning)
+        with open("tests/data2.txt", "a") as file:
+            file.write(str(times))
 
     return times
 
 def main():
     tests = read_tests()
-    count = 100
-    min_depth = 1
-    max_depth = 8
-    with_no_pruning = True
+    count = 30
+    min_depth = 12
+    max_depth = 12
+    with_no_pruning = False
     print(time_nodes_diff_depths_test(tests, count, min_depth, max_depth, with_no_pruning))
 
 
