@@ -1,5 +1,6 @@
 import pygame, time
 from minimax import minimax, minimax_alphabeta
+from tree_drawer import TreeDrawer
 
 
 def get_score(cnt):
@@ -80,9 +81,9 @@ def get_copy(board):
 
 
 pygame.init()
-WINDOW_WIDTH, WINDOW_HEIGHT = 1000, 600
+WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
 HEIGHT, WIDTH = 6, 7
-START_X, START_Y = 80, 50
+START_X, START_Y = 10, 50
 RADIUS = 31
 GAP = 25
 START_DRAW_X, START_DRAW_Y = START_X + 28 + RADIUS, 80 + RADIUS
@@ -99,14 +100,17 @@ game_grid: list[list[int]] = [[EMPTY] * WIDTH for j in range(HEIGHT)]
 colomn_ind: list[int] = [0] * WIDTH
 selected = 6
 select_shift = 2 * RADIUS + GAP
-# print(game_grid)
-# print("here", colomn_ind)
 x = GAP // 2
 
 score_one = 0
 score_two = 0
 
 text_font = pygame.font.Font("regular_font.otf", 40)
+
+tree_index = 0
+tree: list[float | None] = []
+tree_drawer = TreeDrawer(tree, screen, text_font)
+tree_maximising = True
 
 column_rects: list[pygame.Rect] = []
 for i in range(WIDTH):
@@ -123,6 +127,28 @@ while game_active:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
+
+        # handle tree input
+        if tree != [] and event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_x = pygame.mouse.get_pos()[0]
+            mouse_y = pygame.mouse.get_pos()[1]
+            if (
+                tree_drawer.circle_intersects(
+                    mouse_x, mouse_y, tree_drawer.node_x, tree_drawer.parent_y
+                )
+                and tree_index != 0
+            ):
+                tree_index = (tree_index - 1) // 7
+                tree_maximising = not tree_maximising
+
+            for child in range(7):
+                if tree_drawer.circle_intersects(
+                    mouse_x, mouse_y, tree_drawer.child_x[child], tree_drawer.child_y
+                ) and tree_index * 7 + 1 + child <= len(tree):
+                    tree_index = tree_index * 7 + 1 + child
+                    tree_maximising = not tree_maximising
+                    break
+
         if player == PLAYER_ONE and event.type == pygame.MOUSEBUTTONDOWN:
             if board_image_rect.collidepoint(mouse.get_pos()):
                 if colomn_ind[selected] < HEIGHT:
@@ -133,6 +159,8 @@ while game_active:
                     played = True
 
     screen.fill("Black")
+    if tree != []:
+        tree_drawer.draw(tree_index, True)
     screen.blit(board_image, board_image_rect)
     shift_y = GAP * (HEIGHT - 1)
     for row in range(HEIGHT - 1, -1, -1):
@@ -170,9 +198,16 @@ while game_active:
     screen.blit(score2, score2.get_rect(topright=(950, 60)))
 
     if player == PLAYER_TWO:
+        tree_index = 0
         print(game_grid)
         start = time.time()
-        value, move, nodes = minimax_alphabeta(get_copy(game_grid), 4, True, colomn_ind)
+        depth: int = 4
+        tree = [None for _ in range(int((7 ** (depth + 1) - 1) / 6))]
+        value, move, nodes = minimax_alphabeta(
+            get_copy(game_grid), depth, True, colomn_ind, tree
+        )
+        tree_drawer.tree = tree
+
         end = time.time()
         print(end - start)
         print(value, move)
@@ -190,12 +225,9 @@ while game_active:
             selected = 0
         elif selected >= WIDTH:
             selected = WIDTH - 1
-        # print(selected)
         mouse.set_cursor(11)
     else:
         mouse.set_cursor(0)
-    # for i in range(len(column_rects)):
-    #     if (mouse.get_pos())
 
     # Draw the arrow
     if player == PLAYER_ONE:
@@ -225,11 +257,5 @@ while game_active:
             ],
         )
 
-    # print(mouse.get_pos())
-    # pygame.draw.circle(screen, "Yellow", (100,100), 100)
     pygame.display.update()
     clock.tick(60)
-
-
-# state id ----> (value, move, child id)
-tree: dict[int, list[(int, int, int)]]

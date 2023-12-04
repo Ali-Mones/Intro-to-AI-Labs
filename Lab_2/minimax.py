@@ -1,11 +1,12 @@
 import math
 from typing import overload
+from tree_drawer import TreeDrawer
 
 HUMAN = 0
 AI = 1
 EMPTY = 2
 HEIGHT, WIDTH = 6, 7
-m: dict[str, int] = {}
+m: dict[str, float] = {}
 hoz_hue = [1, 2, 3, 4, 3, 2, 1]
 ver_hue = [1, 2, 3, 3, 2, 1]
 diag_hue = [
@@ -132,19 +133,6 @@ def hueristic(board):
     return score
 
 
-# def hueristic(board, player):
-# 	score = 69
-# 	for row in range(HEIGHT):
-# 		for col in range(WIDTH):
-# 			if board[row][col] == player:
-# 				score += ver_hue[row]
-# 				score += hoz_hue[col]
-# 				score += diag_hue[row][col]
-# 				score += diag_hue[HEIGHT - 1- row][col]
-# 	return score
-# return best value of childern along with the best move
-
-
 def parr(board):
     for row in board:
         print(row)
@@ -159,7 +147,13 @@ def get_copy(board):
     return c
 
 
-def minimax(board: list[list[int]], depth, maximizing: bool, colomn_ind: list[int]):
+def minimax(
+    board: list[list[int]],
+    depth,
+    maximizing: bool,
+    colomn_ind: list[int],
+    tree: list[float | None],
+):
     state = "2" * 7 * 6
     m.clear()
     state = list(state)
@@ -167,9 +161,16 @@ def minimax(board: list[list[int]], depth, maximizing: bool, colomn_ind: list[in
         for j in range(WIDTH):
             state[i * WIDTH + j] = chr(board[i][j] + ord("0"))
     print(state)
-    return minimax2(board, depth, maximizing, colomn_ind, state)
+    return minimax2(board, depth, maximizing, colomn_ind, state, tree, 0)
 
-def minimax_alphabeta(board: list[list[int]], depth, maximizing: bool, colomn_ind: list[int]):
+
+def minimax_alphabeta(
+    board: list[list[int]],
+    depth,
+    maximizing: bool,
+    colomn_ind: list[int],
+    tree: list[float | None],
+):
     state = "2" * 7 * 6
     m.clear()
     state = list(state)
@@ -177,7 +178,9 @@ def minimax_alphabeta(board: list[list[int]], depth, maximizing: bool, colomn_in
         for j in range(WIDTH):
             state[i * WIDTH + j] = chr(board[i][j] + ord("0"))
     print(state)
-    return minimax_alphabeta_impl(board, depth, maximizing, colomn_ind, state, -math.inf, math.inf)
+    return minimax_alphabeta_impl(
+        board, depth, maximizing, colomn_ind, state, -math.inf, math.inf, tree, 0
+    )
 
 
 def minimax2(
@@ -186,28 +189,31 @@ def minimax2(
     maximizing: bool,
     colomn_ind: list[int],
     state: list[str],
-) -> (int, int):
+    tree: list[float | None],
+    tree_index: int,
+) -> tuple[float, int, int]:
     columns = [int(i) for i in range(len(colomn_ind)) if colomn_ind[i] < HEIGHT]
     if not columns:
         print(colomn_ind)
         winner = detect_winner(board)
         if winner == AI:
+            tree[tree_index] = math.inf
             return (math.inf, -1, 1)
         elif winner == HUMAN:
+            tree[tree_index] = -math.inf
             return (-math.inf, -1, 1)
         else:
+            tree[tree_index] = 0
             return (0, -1, 1)
 
     if depth == 0:
-        # print("depth ended")
         score = hueristic(board)
-        # parr(board)
+        tree[tree_index] = score
         return (score, -1, 1)
     state_str = "".join(state)
     if m.get(state_str):
-        # print("Worked")
         return (m[state_str], -1, 1)
-    
+
     nodes_expanded = 0
     if maximizing:
         value = -math.inf
@@ -216,7 +222,15 @@ def minimax2(
             board[HEIGHT - 1 - colomn_ind[col]][col] = AI
             state[(HEIGHT - 1 - colomn_ind[col]) * WIDTH + col] = chr(AI + ord("0"))
             colomn_ind[col] += 1
-            new_value, new_move, nodes = minimax2(board, depth - 1, False, colomn_ind, state)
+            new_value, new_move, nodes = minimax2(
+                board,
+                depth - 1,
+                False,
+                colomn_ind,
+                state,
+                tree,
+                tree_index * 7 + 1 + col,
+            )
             nodes_expanded += nodes
             colomn_ind[col] -= 1
             board[HEIGHT - 1 - colomn_ind[col]][col] = EMPTY
@@ -225,20 +239,26 @@ def minimax2(
                 value = new_value
                 move = col
         m[state_str] = value
+        tree[tree_index] = value
         return value, move, nodes_expanded
     else:
         # print(maximizing)
         value = math.inf
         move = columns[0]
         for col in columns:
-            # new_board = get_copy(board)
-            # new_colomn_ind = colomn_ind.copy()
-            # new_state = state.copy()
             board[HEIGHT - 1 - colomn_ind[col]][col] = HUMAN
             state[(HEIGHT - 1 - colomn_ind[col]) * WIDTH + col] = chr(HUMAN + ord("0"))
             colomn_ind[col] += 1
 
-            new_value, new_move, nodes = minimax2(board, depth - 1, True, colomn_ind, state)
+            new_value, new_move, nodes = minimax2(
+                board,
+                depth - 1,
+                True,
+                colomn_ind,
+                state,
+                tree,
+                tree_index * 7 + 1 + col,
+            )
             nodes_expanded += nodes
             colomn_ind[col] -= 1
             board[HEIGHT - 1 - colomn_ind[col]][col] = EMPTY
@@ -247,7 +267,9 @@ def minimax2(
                 value = new_value
                 move = col
         m[state_str] = value
+        tree[tree_index] = value
         return value, move, nodes_expanded
+
 
 def minimax_alphabeta_impl(
     board: list[list[int]],
@@ -255,30 +277,35 @@ def minimax_alphabeta_impl(
     maximizing: bool,
     colomn_ind: list[int],
     state: list[str],
-    alpha: int,
-    beta: int,
-) -> (int, int):
+    alpha: float,
+    beta: float,
+    tree: list[float | None],
+    tree_index: int,
+) -> tuple[float, int, int]:
     columns = [int(i) for i in range(len(colomn_ind)) if colomn_ind[i] < HEIGHT]
     if not columns:
         print(colomn_ind)
         winner = detect_winner(board)
         if winner == AI:
+            tree[tree_index] = math.inf
             return (math.inf, -1, 1)
         elif winner == HUMAN:
+            tree[tree_index] = -math.inf
             return (-math.inf, -1, 1)
         else:
+            tree[tree_index] = 0
             return (0, -1, 1)
 
     if depth == 0:
-        # print("depth ended")
         score = hueristic(board)
-        # parr(board)
+        tree[tree_index] = score
         return (score, -1, 1)
     state_str = "".join(state)
+
     if m.get(state_str):
-        # print("Worked")
         return (m[state_str], -1, 1)
     nodes_expanded = 0
+
     if maximizing:
         value = -math.inf
         move = columns[0]
@@ -287,7 +314,15 @@ def minimax_alphabeta_impl(
             state[(HEIGHT - 1 - colomn_ind[col]) * WIDTH + col] = chr(AI + ord("0"))
             colomn_ind[col] += 1
             new_value, new_move, nodes = minimax_alphabeta_impl(
-                board, depth - 1, False, colomn_ind, state, alpha, beta
+                board,
+                depth - 1,
+                False,
+                colomn_ind,
+                state,
+                alpha,
+                beta,
+                tree,
+                tree_index * 7 + 1 + col,
             )
             nodes_expanded += nodes
             colomn_ind[col] -= 1
@@ -300,20 +335,27 @@ def minimax_alphabeta_impl(
             if alpha >= beta:
                 break
         m[state_str] = value
+        tree[tree_index] = value
         return value, move, nodes_expanded
     else:
-        # print(maximizing)
         value = math.inf
         move = columns[0]
         for col in columns:
-            # new_board = get_copy(board)
-            # new_colomn_ind = colomn_ind.copy()
-            # new_state = state.copy()
             board[HEIGHT - 1 - colomn_ind[col]][col] = HUMAN
             state[(HEIGHT - 1 - colomn_ind[col]) * WIDTH + col] = chr(HUMAN + ord("0"))
             colomn_ind[col] += 1
 
-            new_value, new_move, nodes = minimax_alphabeta_impl(board, depth - 1, True, colomn_ind, state, alpha, beta)
+            new_value, new_move, nodes = minimax_alphabeta_impl(
+                board,
+                depth - 1,
+                True,
+                colomn_ind,
+                state,
+                alpha,
+                beta,
+                tree,
+                tree_index * 7 + 1 + col,
+            )
             nodes_expanded += nodes
             colomn_ind[col] -= 1
             board[HEIGHT - 1 - colomn_ind[col]][col] = EMPTY
@@ -325,20 +367,5 @@ def minimax_alphabeta_impl(
             if alpha >= beta:
                 break
         m[state_str] = value
+        tree[tree_index] = value
         return value, move, nodes_expanded
-
-
-# game_grid: list[list[int]] = [[EMPTY]*WIDTH for j in range(HEIGHT)]
-# game_grid[HEIGHT-1][2] = HUMAN
-# column_ind = [0,0,1,0,0,0,0]
-# parr((game_grid))
-# c = get_copy(game_grid)
-# c[0][0] =10000
-# print(game_grid)
-# print(c)
-# print(c==game_grid)
-
-# parr(game_grid)
-# print(minimax(get_copy(game_grid), 2, True, column_ind))
-# parr(game_grid)
-# print(column_ind)
